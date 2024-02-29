@@ -17,7 +17,7 @@ public class TransType {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     @Enumerated(EnumType.STRING)
     private TransTypeEnum transType;
 }

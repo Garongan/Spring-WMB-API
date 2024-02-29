@@ -10,15 +10,12 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = TableName.M_CUSTOMER)
-public class Customer {
+@Table(name = TableName.M_TABLE)
+public class TableMenu {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
-
-    @Column(name = "phone_number")
-    private String phone;
 }

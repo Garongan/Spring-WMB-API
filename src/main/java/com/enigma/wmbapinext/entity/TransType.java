@@ -5,6 +5,7 @@ import com.enigma.wmbapinext.constant.TransTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 @Entity
 @Setter
 @Getter
@@ -14,10 +15,9 @@ import lombok.*;
 @Table(name = TableName.M_TRANS_TYPE)
 public class TransType {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @Enumerated(EnumType.STRING)
+    private TransTypeEnum id;
 
     @Column(name = "description", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TransTypeEnum transType;
+    private String description;
 }

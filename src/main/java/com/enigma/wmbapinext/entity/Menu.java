@@ -4,6 +4,7 @@ import com.enigma.wmbapinext.constant.TableName;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 @Entity
 @Setter
 @Getter

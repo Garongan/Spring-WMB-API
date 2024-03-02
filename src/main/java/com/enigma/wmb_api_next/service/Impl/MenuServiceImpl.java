@@ -31,7 +31,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public Menu getById(String id) {
-        return menuRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu Id Not Found"));
+        return menuRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu Not Found"));
     }
 
     @Override

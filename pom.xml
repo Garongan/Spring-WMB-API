@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.enigma</groupId>
-	<artifactId>wmb-api-next</artifactId>
+	<artifactId>wmb_api_next</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>wmb-api-next</name>
 	<description>API dari database Warung Bahari Next Generation</description>

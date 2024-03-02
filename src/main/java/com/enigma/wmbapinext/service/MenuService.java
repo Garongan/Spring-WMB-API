@@ -7,6 +7,8 @@ import java.util.List;
 public interface MenuService {
     Menu save(Menu menu);
 
+    List<Menu> saveBulk(List<Menu> menu);
+
     Menu getById(String id);
 
     List<Menu> getAll();

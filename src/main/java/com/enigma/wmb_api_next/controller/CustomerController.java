@@ -20,7 +20,7 @@ public class CustomerController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public Customer save(@RequestBody Customer customer) {
-        return customerService.save(customer);
+        return customerService.saveOrGet(customer.getName());
     }
 
     @PostMapping(

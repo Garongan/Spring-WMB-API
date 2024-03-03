@@ -8,6 +8,7 @@ public interface TableMenuService {
     TableMenu save(TableMenu tableMenu);
 
     TableMenu getById(String id);
+    TableMenu getByName(String name);
 
     List<TableMenu> getAll();
 

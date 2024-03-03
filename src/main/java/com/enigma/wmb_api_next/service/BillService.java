@@ -1,13 +1,14 @@
 package com.enigma.wmb_api_next.service;
 
-import com.enigma.wmb_api_next.entity.Bill;
+import com.enigma.wmb_api_next.dto.request.BillRequest;
+import com.enigma.wmb_api_next.dto.response.BillResponse;
 
 import java.util.List;
 
 public interface BillService {
-    Bill save(Bill bill);
+    BillResponse save(BillRequest request);
 
-    Bill getById(String id);
+    BillResponse getById(String id);
 
-    List<Bill> getAll();
+    List<BillResponse> getAll();
 }

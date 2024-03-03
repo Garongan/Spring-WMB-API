@@ -18,8 +18,11 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
     @Override
-    public Customer save(Customer customer) {
-        return customerRepository.saveAndFlush(customer);
+    public Customer saveOrGet(String name) {
+        Customer customer = Customer.builder()
+                .name(name)
+                .build();
+        return customerRepository.findByNameLikeIgnoreCase("%" + name + "%").orElseGet(() -> customerRepository.saveAndFlush(customer));
     }
 
     @Override

@@ -36,7 +36,7 @@ public class Bill {
     @JoinColumn(name = "trans_type", nullable = false)
     private TransType transType;
 
-    @OneToMany(mappedBy = "bill")
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.PERSIST)
     @JsonManagedReference
     private List<BillDetail> billDetails;
 }

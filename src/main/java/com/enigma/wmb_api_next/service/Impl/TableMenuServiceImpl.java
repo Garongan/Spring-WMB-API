@@ -28,6 +28,11 @@ public class TableMenuServiceImpl implements TableMenuService {
     }
 
     @Override
+    public TableMenu getByName(String name) {
+        return tableMenuRepository.findByNameLikeIgnoreCase(name).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Table Menu Not Found"));
+    }
+
+    @Override
     public List<TableMenu> getAll() {
         return tableMenuRepository.findAll();
     }

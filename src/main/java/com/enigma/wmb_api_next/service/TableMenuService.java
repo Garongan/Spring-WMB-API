@@ -4,7 +4,7 @@ import com.enigma.wmb_api_next.entity.TableMenu;
 
 import java.util.List;
 
-public interface TableService {
+public interface TableMenuService {
     TableMenu save(TableMenu tableMenu);
 
     TableMenu getById(String id);

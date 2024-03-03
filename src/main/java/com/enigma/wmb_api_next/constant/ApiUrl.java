@@ -5,4 +5,5 @@ public class ApiUrl {
     public static final String MENU_URL = "/menus";
     public static final String CUSTOMER_URL = "/customers";
     public static final String TABLE_URL = "/tables";
+    public static final String TRANS_TYPE_URL = "/trans-types";
 }

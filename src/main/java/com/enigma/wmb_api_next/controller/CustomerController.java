@@ -1,10 +1,15 @@
 package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
+import com.enigma.wmb_api_next.dto.request.CustomerRequest;
+import com.enigma.wmb_api_next.dto.response.CommonResponse;
+import com.enigma.wmb_api_next.dto.response.CustomerResponse;
 import com.enigma.wmb_api_next.entity.Customer;
 import com.enigma.wmb_api_next.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +24,14 @@ public class CustomerController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Customer save(@RequestBody Customer customer) {
-        return customerService.saveOrGet(customer.getName());
+    public ResponseEntity<CommonResponse<CustomerResponse>> save(@RequestBody CustomerRequest request) {
+        CustomerResponse customerResponse = customerService.save(request);
+        CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
+                .statusCode(HttpStatus.CREATED.value())
+                .message("Customer successfully created")
+                .data(customerResponse)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping(
@@ -28,21 +39,39 @@ public class CustomerController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public List<Customer> saveBulk(@RequestBody List<Customer> customers) {
-        return customerService.saveBulk(customers);
+    public ResponseEntity<CommonResponse<List<CustomerResponse>>> saveBulk(@RequestBody List<CustomerRequest> requests) {
+        List<CustomerResponse> customerResponses = customerService.saveBulk(requests);
+        CommonResponse<List<CustomerResponse>> responses = CommonResponse.<List<CustomerResponse>>builder()
+                .statusCode(HttpStatus.CREATED.value())
+                .message("List of Customer successfully created")
+                .data(customerResponses)
+                .build();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Customer getById(@PathVariable String id) {
-        return customerService.getById(id);
+    public ResponseEntity<CommonResponse<CustomerResponse>> getById(@PathVariable String id) {
+        CustomerResponse customerResponse = customerService.getById(id);
+        CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Customer successfully retrieved")
+                .data(customerResponse)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Customer> getAll() {
-        return customerService.getAll();
+    public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAll() {
+        List<CustomerResponse> customerResponses = customerService.getAll();
+        CommonResponse<List<CustomerResponse>> response = CommonResponse.<List<CustomerResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("List of Customer successfully retrieved")
+                .data(customerResponses)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping(
@@ -50,13 +79,23 @@ public class CustomerController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public Customer update(@RequestBody Customer customer) {
-        return customerService.update(customer);
+    public ResponseEntity<CommonResponse<CustomerResponse>> update(@RequestBody Customer customer) {
+        CustomerResponse updated = customerService.update(customer);
+        CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Customer Updated")
+                .data(updated)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping(path = "/{id}")
-    public String delete(@PathVariable String id) {
+    public ResponseEntity<CommonResponse<String>> delete(@PathVariable String id) {
         customerService.delete(id);
-        return "Customer Has Deleted";
+        CommonResponse<String> response = CommonResponse.<String>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Customer Deleted")
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

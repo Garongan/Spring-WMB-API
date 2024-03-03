@@ -1,5 +1,7 @@
 package com.enigma.wmb_api_next.service.Impl;
 
+import com.enigma.wmb_api_next.dto.request.CustomerRequest;
+import com.enigma.wmb_api_next.dto.response.CustomerResponse;
 import com.enigma.wmb_api_next.entity.Customer;
 import com.enigma.wmb_api_next.repository.CustomerRepository;
 import com.enigma.wmb_api_next.service.CustomerService;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,29 +29,68 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Customer> saveBulk(List<Customer> customers) {
-        return customerRepository.saveAllAndFlush(customers);
+    public CustomerResponse save(CustomerRequest request) {
+        Customer customer = Customer.builder().name(request.getName()).phone(request.getPhoneNumber()).build();
+        customerRepository.saveAndFlush(customer);
+        return CustomerResponse.builder().name(customer.getName()).phoneNumber(customer.getPhone()).build();
     }
 
     @Override
-    public Customer getById(String id) {
-        return customerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer Not Found"));
+    public List<CustomerResponse> saveBulk(List<CustomerRequest> requests) {
+        List<CustomerResponse> responses = new ArrayList<>();
+        List<Customer> customers = requests.stream().map(
+                request -> {
+                    Customer build = Customer.builder()
+                            .name(request.getName())
+                            .phone(request.getPhoneNumber())
+                            .build();
+                    responses.add(CustomerResponse.builder().name(request.getName()).phoneNumber(request.getPhoneNumber()).build());
+                    return build;
+                }
+        ).toList();
+
+        customerRepository.saveAllAndFlush(customers);
+
+        return responses;
     }
 
     @Override
-    public List<Customer> getAll() {
-        return customerRepository.findAll();
+    public CustomerResponse getById(String id) {
+        Customer customer = getCustomerById(id);
+        return CustomerResponse.builder()
+                .name(customer.getName())
+                .phoneNumber(customer.getPhone())
+                .build();
     }
 
     @Override
-    public Customer update(Customer customer) {
-        getById(customer.getId());
-        return customerRepository.saveAndFlush(customer);
+    public List<CustomerResponse> getAll() {
+        List<Customer> customers = customerRepository.findAll();
+        return customers.stream().map(
+                customer -> CustomerResponse.builder()
+                        .name(customer.getName())
+                        .phoneNumber(customer.getPhone())
+                        .build()
+        ).toList();
+    }
+
+    @Override
+    public CustomerResponse update(Customer customer) {
+        getCustomerById(customer.getId());
+        customerRepository.saveAndFlush(customer);
+        return CustomerResponse.builder()
+                .name(customer.getName())
+                .phoneNumber(customer.getPhone())
+                .build();
     }
 
     @Override
     public void delete(String id) {
-        Customer customer = getById(id);
+        Customer customer = getCustomerById(id);
         customerRepository.delete(customer);
+    }
+
+    private Customer getCustomerById(String id){
+        return customerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer Not Found"));
     }
 }

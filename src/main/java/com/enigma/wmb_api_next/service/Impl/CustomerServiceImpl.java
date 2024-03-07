@@ -28,6 +28,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
         Customer saved = customerRepository.findByNameLikeIgnoreCaseAndPhoneEquals("%" + request.getName() + "%", request.getPhoneNumber()).orElseGet(() -> customerRepository.saveAndFlush(customer));
         return CustomerResponse.builder()
+                .id(saved.getId())
                 .name(saved.getName())
                 .phoneNumber(saved.getPhone())
                 .build();

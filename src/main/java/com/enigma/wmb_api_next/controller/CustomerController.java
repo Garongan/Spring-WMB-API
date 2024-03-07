@@ -1,6 +1,7 @@
 package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
+import com.enigma.wmb_api_next.constant.StatusMessege;
 import com.enigma.wmb_api_next.dto.request.CustomerRequest;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.CustomerResponse;
@@ -26,12 +27,7 @@ public class CustomerController {
     )
     public ResponseEntity<CommonResponse<CustomerResponse>> save(@RequestBody CustomerRequest request) {
         CustomerResponse customerResponse = customerService.saveOrGet(request);
-        CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
-                .statusCode(HttpStatus.CREATED.value())
-                .message("Customer successfully created")
-                .data(customerResponse)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(getCommonResponse(customerResponse, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
 
     @PostMapping(
@@ -41,12 +37,7 @@ public class CustomerController {
     )
     public ResponseEntity<CommonResponse<List<CustomerResponse>>> saveBulk(@RequestBody List<CustomerRequest> requests) {
         List<CustomerResponse> customerResponses = customerService.saveBulk(requests);
-        CommonResponse<List<CustomerResponse>> responses = CommonResponse.<List<CustomerResponse>>builder()
-                .statusCode(HttpStatus.CREATED.value())
-                .message("List of Customer successfully created")
-                .data(customerResponses)
-                .build();
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(getListCommonResponse(customerResponses, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE_LIST));
     }
 
     @GetMapping(
@@ -55,23 +46,13 @@ public class CustomerController {
     )
     public ResponseEntity<CommonResponse<CustomerResponse>> getById(@PathVariable String id) {
         CustomerResponse customerResponse = customerService.getById(id);
-        CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
-                .statusCode(HttpStatus.OK.value())
-                .message("Customer successfully retrieved")
-                .data(customerResponse)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(getCommonResponse(customerResponse, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAll() {
         List<CustomerResponse> customerResponses = customerService.getAll();
-        CommonResponse<List<CustomerResponse>> response = CommonResponse.<List<CustomerResponse>>builder()
-                .statusCode(HttpStatus.OK.value())
-                .message("List of Customer successfully retrieved")
-                .data(customerResponses)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(getListCommonResponse(customerResponses, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE_LIST));
     }
 
     @PutMapping(
@@ -81,12 +62,7 @@ public class CustomerController {
     )
     public ResponseEntity<CommonResponse<CustomerResponse>> update(@RequestBody Customer customer) {
         CustomerResponse updated = customerService.update(customer);
-        CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
-                .statusCode(HttpStatus.OK.value())
-                .message("Customer Updated")
-                .data(updated)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(getCommonResponse(updated, HttpStatus.OK, StatusMessege.SUCCESS_UPDATE));
     }
 
     @DeleteMapping(path = "/{id}")
@@ -94,8 +70,25 @@ public class CustomerController {
         customerService.delete(id);
         CommonResponse<String> response = CommonResponse.<String>builder()
                 .statusCode(HttpStatus.OK.value())
-                .message("Customer Deleted")
+                .message(StatusMessege.SUCCESS_DELETE)
+                .data(id)
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    private CommonResponse<CustomerResponse> getCommonResponse(CustomerResponse customerResponse, HttpStatus status, String message) {
+        return CommonResponse.<CustomerResponse>builder()
+                .statusCode(status.value())
+                .message(message)
+                .data(customerResponse)
+                .build();
+    }
+    private static CommonResponse<List<CustomerResponse>> getListCommonResponse(List<CustomerResponse> customerResponses, HttpStatus status, String message) {
+        return CommonResponse.<List<CustomerResponse>>builder()
+                .statusCode(status.value())
+                .message(message)
+                .data(customerResponses)
+                .build();
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
+import com.enigma.wmb_api_next.dto.request.MenuRequest;
+import com.enigma.wmb_api_next.dto.response.MenuResponse;
 import com.enigma.wmb_api_next.entity.Menu;
 import com.enigma.wmb_api_next.service.MenuService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ public class MenuController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public Menu save(@RequestBody Menu menu) {
+    public MenuResponse save(@RequestBody MenuRequest menu) {
         return menuService.save(menu);
     }
 
@@ -28,7 +30,7 @@ public class MenuController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public List<Menu> saveBulk(@RequestBody List<Menu> menu) {
+    public List<MenuResponse> saveBulk(@RequestBody List<MenuRequest> menu) {
         return menuService.saveBulk(menu);
     }
 
@@ -36,12 +38,12 @@ public class MenuController {
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Menu getById(@PathVariable String id) {
+    public MenuResponse getById(@PathVariable String id) {
         return menuService.getById(id);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Menu> getAll(
+    public List<MenuResponse> getAll(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "minPrice", required = false) Long minPrice,
             @RequestParam(name = "maxPrice", required = false) Long maxPrice
@@ -54,7 +56,7 @@ public class MenuController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public Menu update(@RequestBody Menu menu) {
+    public MenuResponse update(@RequestBody Menu menu) {
         return menuService.update(menu);
     }
 

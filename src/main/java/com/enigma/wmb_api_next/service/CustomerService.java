@@ -7,8 +7,7 @@ import com.enigma.wmb_api_next.entity.Customer;
 import java.util.List;
 
 public interface CustomerService {
-    Customer saveOrGet(String name);
-    CustomerResponse save(CustomerRequest request);
+    CustomerResponse saveOrGet(CustomerRequest request);
     List<CustomerResponse> saveBulk(List<CustomerRequest> requests);
     CustomerResponse getById(String id);
 

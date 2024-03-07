@@ -1,19 +1,22 @@
 package com.enigma.wmb_api_next.service;
 
+import com.enigma.wmb_api_next.dto.request.MenuRequest;
+import com.enigma.wmb_api_next.dto.response.MenuResponse;
 import com.enigma.wmb_api_next.entity.Menu;
 
 import java.util.List;
 
 public interface MenuService {
-    Menu save(Menu menu);
+    MenuResponse save(MenuRequest menu);
 
-    List<Menu> saveBulk(List<Menu> menu);
+    List<MenuResponse> saveBulk(List<MenuRequest> menuRequestList);
 
-    Menu getById(String id);
+    MenuResponse getById(String id);
+    Menu getMenuById(String id);
 
-    List<Menu> getAll(String name, Long minPrice, Long maxPrice);
+    List<MenuResponse> getAll(String name, Long minPrice, Long maxPrice);
 
-    Menu update(Menu menu);
+    MenuResponse update(Menu menu);
 
     void delete(String id);
 }

@@ -1,8 +1,10 @@
 package com.enigma.wmb_api_next.service.Impl;
 
 import com.enigma.wmb_api_next.dto.request.BillRequest;
+import com.enigma.wmb_api_next.dto.request.CustomerRequest;
 import com.enigma.wmb_api_next.dto.response.BillDetailResponse;
 import com.enigma.wmb_api_next.dto.response.BillResponse;
+import com.enigma.wmb_api_next.dto.response.CustomerResponse;
 import com.enigma.wmb_api_next.entity.*;
 import com.enigma.wmb_api_next.repository.BillRepository;
 import com.enigma.wmb_api_next.service.*;
@@ -28,7 +30,12 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public BillResponse save(BillRequest request) {
-        Customer customer = customerService.saveOrGet(request.getCustomerName());
+        CustomerRequest customerRequest = CustomerRequest.builder().name(request.getCustomerName()).phoneNumber(request.getCustomerPhone()).build();
+        CustomerResponse customerResponse = customerService.saveOrGet(customerRequest);
+        Customer customer = Customer.builder()
+                .id(customerResponse.getId())
+                .name(customerResponse.getName())
+                .phone(customerResponse.getPhoneNumber()).build();
 
         Bill bill = Bill.builder()
                 .customer(customer)
@@ -40,7 +47,7 @@ public class BillServiceImpl implements BillService {
         List<BillDetail> billDetails = request.getBillDetails().stream().map(
                 billDetailRequest -> BillDetail.builder()
                         .bill(bill)
-                        .menu(menuService.getById(billDetailRequest.getMenuId()))
+                        .menu(menuService.getMenuById(billDetailRequest.getMenuId()))
                         .qty(billDetailRequest.getQty())
                         .price(billDetailRequest.getPrice())
                         .build()

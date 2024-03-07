@@ -21,18 +21,16 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
     @Override
-    public Customer saveOrGet(String name) {
+    public CustomerResponse saveOrGet(CustomerRequest request) {
         Customer customer = Customer.builder()
-                .name(name)
+                .name(request.getName())
+                .phone(request.getPhoneNumber())
                 .build();
-        return customerRepository.findByNameLikeIgnoreCase("%" + name + "%").orElseGet(() -> customerRepository.saveAndFlush(customer));
-    }
-
-    @Override
-    public CustomerResponse save(CustomerRequest request) {
-        Customer customer = Customer.builder().name(request.getName()).phone(request.getPhoneNumber()).build();
-        customerRepository.saveAndFlush(customer);
-        return CustomerResponse.builder().name(customer.getName()).phoneNumber(customer.getPhone()).build();
+        Customer saved = customerRepository.findByNameLikeIgnoreCaseAndPhoneEquals("%" + request.getName() + "%", request.getPhoneNumber()).orElseGet(() -> customerRepository.saveAndFlush(customer));
+        return CustomerResponse.builder()
+                .name(saved.getName())
+                .phoneNumber(saved.getPhone())
+                .build();
     }
 
     @Override
@@ -58,6 +56,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse getById(String id) {
         Customer customer = getCustomerById(id);
         return CustomerResponse.builder()
+                .id(customer.getId())
                 .name(customer.getName())
                 .phoneNumber(customer.getPhone())
                 .build();
@@ -68,6 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<Customer> customers = customerRepository.findAll();
         return customers.stream().map(
                 customer -> CustomerResponse.builder()
+                        .id(customer.getId())
                         .name(customer.getName())
                         .phoneNumber(customer.getPhone())
                         .build()
@@ -79,6 +79,7 @@ public class CustomerServiceImpl implements CustomerService {
         getCustomerById(customer.getId());
         customerRepository.saveAndFlush(customer);
         return CustomerResponse.builder()
+                .id(customer.getId())
                 .name(customer.getName())
                 .phoneNumber(customer.getPhone())
                 .build();

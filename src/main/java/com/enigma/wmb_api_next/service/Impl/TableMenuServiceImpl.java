@@ -1,5 +1,6 @@
 package com.enigma.wmb_api_next.service.Impl;
 
+import com.enigma.wmb_api_next.dto.request.TableMenuRequest;
 import com.enigma.wmb_api_next.entity.TableMenu;
 import com.enigma.wmb_api_next.repository.TableMenuRepository;
 import com.enigma.wmb_api_next.service.TableMenuService;
@@ -18,7 +19,8 @@ public class TableMenuServiceImpl implements TableMenuService {
     private final TableMenuRepository tableMenuRepository;
 
     @Override
-    public TableMenu save(TableMenu tableMenu) {
+    public TableMenu save(TableMenuRequest request) {
+        TableMenu tableMenu = TableMenu.builder().name(request.getName()).build();
         return tableMenuRepository.saveAndFlush(tableMenu);
     }
 

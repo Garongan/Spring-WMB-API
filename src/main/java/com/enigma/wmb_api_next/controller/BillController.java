@@ -26,7 +26,7 @@ public class BillController {
     )
     public ResponseEntity<CommonResponse<BillResponse>> save(@RequestBody BillRequest request) {
         BillResponse bill = billService.save(request);
-        return ResponseEntity.ok(getBillResponseCommonResponse(bill, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
+        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(bill, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
 
 
@@ -36,7 +36,7 @@ public class BillController {
     )
     public ResponseEntity<CommonResponse<BillResponse>> getById(@PathVariable String id) {
         BillResponse bill = billService.getById(id);
-        return ResponseEntity.ok(getBillResponseCommonResponse(bill, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
+        return ResponseEntity.ok(getCommonResponse(bill, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,13 +44,13 @@ public class BillController {
         List<BillResponse> bills = billService.getAll();
         CommonResponse<List<BillResponse>> response = CommonResponse.<List<BillResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .message("Bills successfully retrieved")
+                .message(StatusMessege.SUCCESS_RETRIEVE_LIST)
                 .data(bills)
                 .build();
         return ResponseEntity.ok(response);
     }
 
-    private static CommonResponse<BillResponse> getBillResponseCommonResponse(BillResponse bill, HttpStatus status, String message) {
+    private static CommonResponse<BillResponse> getCommonResponse(BillResponse bill, HttpStatus status, String message) {
         return CommonResponse.<BillResponse>builder()
                 .statusCode(status.value())
                 .message(message)

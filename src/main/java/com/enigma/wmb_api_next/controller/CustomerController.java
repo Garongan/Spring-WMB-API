@@ -27,7 +27,7 @@ public class CustomerController {
     )
     public ResponseEntity<CommonResponse<CustomerResponse>> save(@RequestBody CustomerRequest request) {
         CustomerResponse customerResponse = customerService.saveOrGet(request);
-        return ResponseEntity.ok(getCommonResponse(customerResponse, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
+        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(customerResponse, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
 
     @PostMapping(
@@ -37,7 +37,7 @@ public class CustomerController {
     )
     public ResponseEntity<CommonResponse<List<CustomerResponse>>> saveBulk(@RequestBody List<CustomerRequest> requests) {
         List<CustomerResponse> customerResponses = customerService.saveBulk(requests);
-        return ResponseEntity.ok(getListCommonResponse(customerResponses, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE_LIST));
+        return ResponseEntity.status(HttpStatus.CREATED).body(getListCommonResponse(customerResponses, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE_LIST));
     }
 
     @GetMapping(
@@ -71,7 +71,6 @@ public class CustomerController {
         CommonResponse<String> response = CommonResponse.<String>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message(StatusMessege.SUCCESS_DELETE)
-                .data(id)
                 .build();
         return ResponseEntity.ok(response);
     }

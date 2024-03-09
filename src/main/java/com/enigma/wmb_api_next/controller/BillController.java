@@ -1,6 +1,7 @@
 package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
+import com.enigma.wmb_api_next.constant.StatusMessege;
 import com.enigma.wmb_api_next.dto.request.BillRequest;
 import com.enigma.wmb_api_next.dto.response.BillResponse;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
@@ -25,13 +26,9 @@ public class BillController {
     )
     public ResponseEntity<CommonResponse<BillResponse>> save(@RequestBody BillRequest request) {
         BillResponse bill = billService.save(request);
-        CommonResponse<BillResponse> response = CommonResponse.<BillResponse>builder()
-                .statusCode(HttpStatus.CREATED.value())
-                .message("Bill successfully created")
-                .data(bill)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(bill, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
+
 
     @GetMapping(
             path = "/{id}",
@@ -39,12 +36,7 @@ public class BillController {
     )
     public ResponseEntity<CommonResponse<BillResponse>> getById(@PathVariable String id) {
         BillResponse bill = billService.getById(id);
-        CommonResponse<BillResponse> response = CommonResponse.<BillResponse>builder()
-                .statusCode(HttpStatus.OK.value())
-                .message("Bill successfully retrieved")
-                .data(bill)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(getCommonResponse(bill, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -52,9 +44,17 @@ public class BillController {
         List<BillResponse> bills = billService.getAll();
         CommonResponse<List<BillResponse>> response = CommonResponse.<List<BillResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .message("Bills successfully retrieved")
+                .message(StatusMessege.SUCCESS_RETRIEVE_LIST)
                 .data(bills)
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    private static CommonResponse<BillResponse> getCommonResponse(BillResponse bill, HttpStatus status, String message) {
+        return CommonResponse.<BillResponse>builder()
+                .statusCode(status.value())
+                .message(message)
+                .data(bill)
+                .build();
     }
 }

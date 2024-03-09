@@ -25,7 +25,7 @@ public class CustomerController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CommonResponse<CustomerResponse>> save(@RequestBody CustomerRequest request) {
-        CustomerResponse customerResponse = customerService.saveOrGet(request);
+        CustomerResponse customerResponse = customerService.save(request);
         CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .message("Customer successfully created")

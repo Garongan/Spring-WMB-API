@@ -1,9 +1,11 @@
 package com.enigma.wmb_api_next.service.Impl;
 
+import com.enigma.wmb_api_next.constant.StatusMessage;
 import com.enigma.wmb_api_next.constant.TransTypeEnum;
 import com.enigma.wmb_api_next.dto.request.BillRequest;
 import com.enigma.wmb_api_next.dto.request.CustomerRequest;
 import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
+import com.enigma.wmb_api_next.dto.request.UpdateBillRequest;
 import com.enigma.wmb_api_next.dto.response.*;
 import com.enigma.wmb_api_next.entity.*;
 import com.enigma.wmb_api_next.repository.BillRepository;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -36,6 +39,7 @@ public class BillServiceImpl implements BillService {
     private final TableMenuService tableMenuService;
     private final BillSpecification specification;
     private final ValidationUtil validationUtil;
+    private final PaymentService paymentService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -85,6 +89,9 @@ public class BillServiceImpl implements BillService {
 
         bill.setBillDetails(billDetails);
 
+        Payment payment = paymentService.createPayment(bill);
+        bill.setPayment(payment);
+
         Bill saved = billRepository.saveAndFlush(bill);
 
         return BillResponse.builder()
@@ -102,6 +109,12 @@ public class BillServiceImpl implements BillService {
                                 .price(billDetail.getPrice())
                                 .build()
                 ).toList())
+                .payment(PaymentResponse.builder()
+                        .id(payment.getId())
+                        .token(payment.getTokan())
+                        .transactionStatus(payment.getTransactionStatus())
+                        .redirectUrl(payment.getRedirectUrl())
+                        .build())
                 .build();
     }
 
@@ -154,7 +167,21 @@ public class BillServiceImpl implements BillService {
                                         .price(billDetail.getPrice())
                                         .build()
                         ).toList())
+                        .payment(PaymentResponse.builder()
+                                .id(bill.getPayment().getId())
+                                .token(bill.getPayment().getTokan())
+                                .transactionStatus(bill.getPayment().getTransactionStatus())
+                                .redirectUrl(bill.getPayment().getRedirectUrl())
+                                .build()
+                        )
                         .build()
         ).toList();
+    }
+
+    @Override
+    public void UpdateStatusPayment(UpdateBillRequest request) {
+        Bill bill = billRepository.findById(request.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, StatusMessage.NOT_FOUND));
+        Payment payment = bill.getPayment();
+        payment.setTransactionStatus(request.getTransactionStatus());
     }
 }

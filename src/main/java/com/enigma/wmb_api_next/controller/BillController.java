@@ -4,6 +4,7 @@ import com.enigma.wmb_api_next.constant.ApiUrl;
 import com.enigma.wmb_api_next.constant.StatusMessege;
 import com.enigma.wmb_api_next.dto.request.BillRequest;
 import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
+import com.enigma.wmb_api_next.dto.request.UpdateBillRequest;
 import com.enigma.wmb_api_next.dto.response.BillResponse;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.service.BillService;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(ApiUrl.API_URL + ApiUrl.BILL_URL)
@@ -27,7 +29,7 @@ public class BillController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<CommonResponse<BillResponse>> save(@RequestBody BillRequest request) {
+    public ResponseEntity<CommonResponse<?>> save(@RequestBody BillRequest request) {
         BillResponse bill = billService.save(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(bill, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
@@ -62,6 +64,20 @@ public class BillController {
                 .data(bills)
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping(
+            path = "/status",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CommonResponse<?>> updateStatus(@RequestBody Map<String, Object> request) {
+        UpdateBillRequest updateBillRequest = UpdateBillRequest.builder()
+                .id(request.get("order_id").toString())
+                .transactionStatus(request.get("transaction_status").toString())
+                .build();
+        billService.UpdateStatusPayment(updateBillRequest);
+        return ResponseEntity.ok(getCommonResponse(null, HttpStatus.OK, StatusMessege.SUCCESS_UPDATE));
     }
 
     private static CommonResponse<BillResponse> getCommonResponse(BillResponse bill, HttpStatus status, String message) {

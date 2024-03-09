@@ -16,4 +16,5 @@ public class StatusMessage {
     public static final String UNAUTHORIZED = "Unauthorized";
     public static final String CONFLICT = "Data has reference to another table";
     public static final String ACCESS_DENIED = "Access Denied";
+    public static final String IMAGE_NOT_FOUND = "Image not found";
 }

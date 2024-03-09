@@ -29,6 +29,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(req -> req
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.POST, "wmb-api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/wmb-api/bills/status/").permitAll()
+                        .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

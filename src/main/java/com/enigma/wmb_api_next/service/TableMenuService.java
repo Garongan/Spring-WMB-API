@@ -1,19 +1,16 @@
 package com.enigma.wmb_api_next.service;
 
 import com.enigma.wmb_api_next.dto.request.TableMenuRequest;
-import com.enigma.wmb_api_next.entity.TableMenu;
+import com.enigma.wmb_api_next.dto.request.UpdateTableMenuRequest;
+import com.enigma.wmb_api_next.dto.response.TableMenuResponse;
 
 import java.util.List;
 
 public interface TableMenuService {
-    TableMenu save(TableMenuRequest request);
-
-    TableMenu getById(String id);
-    TableMenu getByName(String name);
-
-    List<TableMenu> getAll();
-
-    TableMenu update(TableMenu tableMenu);
-
+    TableMenuResponse save(TableMenuRequest request);
+    TableMenuResponse getById(String id);
+    TableMenuResponse getByName(String name);
+    List<TableMenuResponse> getAll();
+    TableMenuResponse update(UpdateTableMenuRequest request);
     void delete(String id);
 }

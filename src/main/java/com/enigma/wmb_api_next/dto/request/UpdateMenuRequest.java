@@ -1,20 +1,16 @@
 package com.enigma.wmb_api_next.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@Getter
 @Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MenuRequest {
-    @NotBlank(message = "Menu Name is required")
+public class UpdateMenuRequest {
+    private String id;
     private String name;
-
-    @NotBlank(message = "Menu Price is required")
     private Long price;
-
     private MultipartFile image;
 }

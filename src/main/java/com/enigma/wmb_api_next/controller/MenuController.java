@@ -8,11 +8,15 @@ import com.enigma.wmb_api_next.dto.request.UpdateMenuRequest;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.MenuResponse;
 import com.enigma.wmb_api_next.service.MenuService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,14 +25,28 @@ import java.util.List;
 @RequestMapping(ApiUrl.API_URL + ApiUrl.MENU_URL)
 public class MenuController {
     private final MenuService menuService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<CommonResponse<MenuResponse>> save(@RequestBody MenuRequest menu) {
-        MenuResponse response = menuService.save(menu);
-        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(response, HttpStatus.CREATED, StatusMessage.SUCCESS_CREATE));
+    public ResponseEntity<CommonResponse<?>> save(
+            @RequestPart(name = "menu") String menu,
+            @RequestPart(name = "image") MultipartFile image
+    ) {
+        try {
+            MenuRequest menuRequest = objectMapper.readValue(menu, new TypeReference<>() {});
+            menuRequest.setImage(image);
+
+            MenuResponse saved = menuService.save(menuRequest);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(getCommonResponse(saved, HttpStatus.CREATED, StatusMessage.SUCCESS_CREATE));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(getCommonResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, StatusMessage.INTERNAL_SERVER_ERROR));
+        }
     }
 
     @PostMapping(
@@ -74,13 +92,22 @@ public class MenuController {
     }
 
     @PutMapping(
-            path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<CommonResponse<MenuResponse>> update(@RequestBody UpdateMenuRequest request) {
-        MenuResponse response = menuService.update(request);
-        return ResponseEntity.ok(getCommonResponse(response, HttpStatus.OK, StatusMessage.SUCCESS_UPDATE));
+    public ResponseEntity<CommonResponse<MenuResponse>> update(
+            @RequestPart(name = "menu") String menu,
+            @RequestPart(name = "image") MultipartFile image
+    ) {
+        try {
+            UpdateMenuRequest updateMenuRequest = objectMapper.readValue(menu, new TypeReference<>() {});
+            updateMenuRequest.setImage(image);
+            MenuResponse updated = menuService.update(updateMenuRequest);
+            return ResponseEntity.ok(getCommonResponse(updated, HttpStatus.OK, StatusMessage.SUCCESS_UPDATE));
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(getCommonResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, StatusMessage.INTERNAL_SERVER_ERROR));
+        }
     }
 
     @DeleteMapping(

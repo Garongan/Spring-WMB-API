@@ -8,6 +8,9 @@ import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.LoginResponse;
 import com.enigma.wmb_api_next.dto.response.RegisterResponse;
 import com.enigma.wmb_api_next.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,9 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ApiUrl.API_URL + ApiUrl.AUTH_URL)
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "Auth API")
 public class AuthController {
     private final AuthService authService;
 
+    @Operation(
+            summary = "Register User",
+            description = "Register User"
+    )
+    @SecurityRequirement(name = "Authorization")
     @PostMapping(
             path = "/register/user",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -39,6 +48,11 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(
+            summary = "Register Admin",
+            description = "Register Admin"
+    )
+    @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     @PostMapping(
             path = "/register/admin",

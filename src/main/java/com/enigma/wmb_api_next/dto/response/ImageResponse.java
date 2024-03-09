@@ -7,9 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MenuResponse {
-    private String id;
+public class ImageResponse {
     private String name;
-    private Long price;
-    private ImageResponse imageResponse;
+    private String url;
 }

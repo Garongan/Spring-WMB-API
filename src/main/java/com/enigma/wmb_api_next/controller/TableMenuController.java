@@ -3,7 +3,9 @@ package com.enigma.wmb_api_next.controller;
 import com.enigma.wmb_api_next.constant.ApiUrl;
 import com.enigma.wmb_api_next.constant.StatusMessege;
 import com.enigma.wmb_api_next.dto.request.TableMenuRequest;
+import com.enigma.wmb_api_next.dto.request.UpdateTableMenuRequest;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
+import com.enigma.wmb_api_next.dto.response.TableMenuResponse;
 import com.enigma.wmb_api_next.entity.TableMenu;
 import com.enigma.wmb_api_next.service.TableMenuService;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +27,25 @@ public class TableMenuController {
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CommonResponse<TableMenu>> save(@RequestBody TableMenuRequest request) {
-        TableMenu tableMenu = tableMenuService.save(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(tableMenu, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
+        TableMenuResponse saved = tableMenuService.save(request);
+        TableMenu tableMenu = TableMenu.builder()
+                .id(saved.getId())
+                .name(saved.getName())
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(getCommonResponse(tableMenu, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<TableMenu>>> getALL() {
-        List<TableMenu> tableMenus = tableMenuService.getAll();
+        List<TableMenuResponse> tableMenuResponses = tableMenuService.getAll();
+        List<TableMenu> tableMenus = tableMenuResponses.stream()
+                .map(tableMenuResponse -> TableMenu.builder()
+                        .id(tableMenuResponse.getId())
+                        .name(tableMenuResponse.getName())
+                        .build())
+                .toList();
         return ResponseEntity.ok(getCommonResponse(tableMenus));
     }
 
@@ -40,7 +54,11 @@ public class TableMenuController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CommonResponse<TableMenu>> getById(@PathVariable String id) {
-        TableMenu tableMenu = tableMenuService.getById(id);
+        TableMenuResponse tableMenuResponse = tableMenuService.getById(id);
+        TableMenu tableMenu = TableMenu.builder()
+                .id(tableMenuResponse.getId())
+                .name(tableMenuResponse.getName())
+                .build();
         return ResponseEntity.ok(getCommonResponse(tableMenu, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
     }
 
@@ -49,9 +67,13 @@ public class TableMenuController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<CommonResponse<TableMenu>> update(@RequestBody TableMenu tableMenu) {
-        TableMenu update = tableMenuService.update(tableMenu);
-        return ResponseEntity.ok(getCommonResponse(update, HttpStatus.OK, StatusMessege.SUCCESS_UPDATE));
+    public ResponseEntity<CommonResponse<TableMenu>> update(@RequestBody UpdateTableMenuRequest request) {
+        TableMenuResponse updated = tableMenuService.update(request);
+        TableMenu tableMenu = TableMenu.builder()
+                .id(updated.getId())
+                .name(updated.getName())
+                .build();
+        return ResponseEntity.ok(getCommonResponse(tableMenu, HttpStatus.OK, StatusMessege.SUCCESS_UPDATE));
     }
 
     @DeleteMapping(

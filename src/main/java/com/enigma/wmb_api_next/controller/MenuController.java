@@ -3,9 +3,10 @@ package com.enigma.wmb_api_next.controller;
 import com.enigma.wmb_api_next.constant.ApiUrl;
 import com.enigma.wmb_api_next.constant.StatusMessage;
 import com.enigma.wmb_api_next.dto.request.MenuRequest;
+import com.enigma.wmb_api_next.dto.request.SearchMenuRequest;
+import com.enigma.wmb_api_next.dto.request.UpdateMenuRequest;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.MenuResponse;
-import com.enigma.wmb_api_next.entity.Menu;
 import com.enigma.wmb_api_next.service.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -53,9 +54,22 @@ public class MenuController {
     public ResponseEntity<CommonResponse<List<MenuResponse>>> getAll(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "minPrice", required = false) Long minPrice,
-            @RequestParam(name = "maxPrice", required = false) Long maxPrice
+            @RequestParam(name = "maxPrice", required = false) Long maxPrice,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
-        List<MenuResponse> menuResponses = menuService.getAll(name, minPrice, maxPrice);
+        SearchMenuRequest searchMenuRequest = SearchMenuRequest.builder()
+                .name(name)
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .direction(direction)
+                .sortBy(sortBy)
+                .page(page)
+                .size(size)
+                .build();
+        List<MenuResponse> menuResponses = menuService.getAll(searchMenuRequest);
         return ResponseEntity.ok(getCommonResponseList(menuResponses, HttpStatus.OK, StatusMessage.SUCCESS_RETRIEVE_LIST));
     }
 
@@ -64,8 +78,8 @@ public class MenuController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<CommonResponse<MenuResponse>> update(@RequestBody Menu menu) {
-        MenuResponse response = menuService.update(menu);
+    public ResponseEntity<CommonResponse<MenuResponse>> update(@RequestBody UpdateMenuRequest request) {
+        MenuResponse response = menuService.update(request);
         return ResponseEntity.ok(getCommonResponse(response, HttpStatus.OK, StatusMessage.SUCCESS_UPDATE));
     }
 

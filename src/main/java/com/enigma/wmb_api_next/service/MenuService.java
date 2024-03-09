@@ -1,6 +1,8 @@
 package com.enigma.wmb_api_next.service;
 
 import com.enigma.wmb_api_next.dto.request.MenuRequest;
+import com.enigma.wmb_api_next.dto.request.SearchMenuRequest;
+import com.enigma.wmb_api_next.dto.request.UpdateMenuRequest;
 import com.enigma.wmb_api_next.dto.response.MenuResponse;
 import com.enigma.wmb_api_next.entity.Menu;
 
@@ -14,9 +16,9 @@ public interface MenuService {
     MenuResponse getById(String id);
     Menu getMenuById(String id);
 
-    List<MenuResponse> getAll(String name, Long minPrice, Long maxPrice);
+    List<MenuResponse> getAll(SearchMenuRequest request);
 
-    MenuResponse update(Menu menu);
+    MenuResponse update(UpdateMenuRequest request);
 
     void delete(String id);
 }

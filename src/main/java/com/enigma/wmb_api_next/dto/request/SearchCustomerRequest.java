@@ -1,6 +1,5 @@
 package com.enigma.wmb_api_next.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Setter
@@ -8,7 +7,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TableMenuRequest {
-    @NotBlank(message = "Table Menu Name is required")
+public class SearchCustomerRequest {
     private String name;
+    private String direction;
+    private String sortBy;
+    private Integer page;
+    private Integer size;
 }

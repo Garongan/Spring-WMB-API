@@ -50,6 +50,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.error("Cannot set user authentication: {}", e.getMessage());
         }
-        doFilter(request, response, filterChain);
+        filterChain.doFilter(request, response);
     }
 }

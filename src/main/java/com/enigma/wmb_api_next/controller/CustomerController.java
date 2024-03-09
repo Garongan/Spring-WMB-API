@@ -2,9 +2,10 @@ package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
 import com.enigma.wmb_api_next.dto.request.CustomerRequest;
+import com.enigma.wmb_api_next.dto.request.SearchCustomerRequest;
+import com.enigma.wmb_api_next.dto.request.UpdateCustomerRequest;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.CustomerResponse;
-import com.enigma.wmb_api_next.entity.Customer;
 import com.enigma.wmb_api_next.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class CustomerController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CommonResponse<CustomerResponse>> save(@RequestBody CustomerRequest request) {
-        CustomerResponse customerResponse = customerService.save(request);
+        CustomerResponse customerResponse = customerService.saveOrGet(request);
         CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .message("Customer successfully created")
@@ -64,8 +65,8 @@ public class CustomerController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAll() {
-        List<CustomerResponse> customerResponses = customerService.getAll();
+    public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAll(SearchCustomerRequest request) {
+        List<CustomerResponse> customerResponses = customerService.getAll(request);
         CommonResponse<List<CustomerResponse>> response = CommonResponse.<List<CustomerResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("List of Customer successfully retrieved")
@@ -79,8 +80,8 @@ public class CustomerController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<CommonResponse<CustomerResponse>> update(@RequestBody Customer customer) {
-        CustomerResponse updated = customerService.update(customer);
+    public ResponseEntity<CommonResponse<CustomerResponse>> update(@RequestBody UpdateCustomerRequest request) {
+        CustomerResponse updated = customerService.update(request);
         CommonResponse<CustomerResponse> response = CommonResponse.<CustomerResponse>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("Customer Updated")

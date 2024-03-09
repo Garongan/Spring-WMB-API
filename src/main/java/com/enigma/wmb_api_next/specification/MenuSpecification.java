@@ -1,5 +1,6 @@
 package com.enigma.wmb_api_next.specification;
 
+import com.enigma.wmb_api_next.dto.request.SearchMenuRequest;
 import com.enigma.wmb_api_next.entity.Menu;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.context.annotation.Configuration;
@@ -11,18 +12,18 @@ import java.util.List;
 @Configuration
 public class MenuSpecification {
     public Specification<Menu>
-    specification(String name, Long minPrice, Long maxPrice) {
+    specification(SearchMenuRequest request) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (name != null) {
-                Predicate nameFilter = criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + name.toUpperCase() + "%");
+            if (request.getName() != null) {
+                Predicate nameFilter = criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + request.getName().toUpperCase() + "%");
                 predicates.add(nameFilter);
             }
 
-            if (minPrice != null || maxPrice != null) {
-                Long newMinPrice = minPrice == null ? Long.MIN_VALUE : minPrice;
-                Long newMaxPrice = maxPrice == null ? Long.MAX_VALUE : maxPrice;
+            if (request.getMinPrice() != null || request.getMaxPrice() != null) {
+                Long newMinPrice = request.getMinPrice() == null ? Long.MIN_VALUE : request.getMinPrice();
+                Long newMaxPrice = request.getMaxPrice() == null ? Long.MAX_VALUE : request.getMaxPrice();
                 Predicate priceFilter = criteriaBuilder.between(root.get("price"), newMinPrice, newMaxPrice);
                 predicates.add(priceFilter);
             }

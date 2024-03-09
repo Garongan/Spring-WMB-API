@@ -2,11 +2,20 @@ package com.enigma.wmb_api_next.service.Impl;
 
 import com.enigma.wmb_api_next.dto.request.CustomerRequest;
 import com.enigma.wmb_api_next.dto.request.NewAccountRequest;
+import com.enigma.wmb_api_next.dto.request.SearchCustomerRequest;
+import com.enigma.wmb_api_next.dto.request.UpdateCustomerRequest;
 import com.enigma.wmb_api_next.dto.response.CustomerResponse;
 import com.enigma.wmb_api_next.entity.Customer;
 import com.enigma.wmb_api_next.repository.CustomerRepository;
 import com.enigma.wmb_api_next.service.CustomerService;
+import com.enigma.wmb_api_next.specification.CustomerSpecification;
+import com.enigma.wmb_api_next.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +29,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
+    private final CustomerSpecification specification;
+    private final ValidationUtil validationUtil;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public CustomerResponse saveOrGet(CustomerRequest request) {
+        validationUtil.validate(request);
         Customer customer = Customer.builder()
                 .name(request.getName())
                 .phone(request.getPhoneNumber())
@@ -37,18 +49,19 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void saveAccount(NewAccountRequest request) {
+    public Customer saveAccount(NewAccountRequest request) {
         Customer customer = Customer.builder()
                 .name(request.getName())
                 .phone(request.getPhone())
                 .userAccount(request.getUserAccount())
                 .build();
-        customerRepository.saveAndFlush(customer);
+        return customerRepository.saveAndFlush(customer);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public List<CustomerResponse> saveBulk(List<CustomerRequest> requests) {
+        validationUtil.validate(requests);
         List<CustomerResponse> responses = new ArrayList<>();
         List<Customer> customers = requests.stream().map(
                 request -> {
@@ -79,8 +92,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<CustomerResponse> getAll() {
-        List<Customer> customers = customerRepository.findAll();
+    public List<CustomerResponse> getAll(SearchCustomerRequest request) {
+        Specification<Customer> CustomerSpecification = specification.specification(request.getName());
+
+        Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
+        if (request.getPage() <= 0) request.setPage(1);
+        Pageable pageable = PageRequest.of(request.getPage() -1, request.getSize(), sort);
+
+        Page<Customer> customers = customerRepository.findAll(CustomerSpecification, pageable);
         return customers.stream().map(
                 customer -> CustomerResponse.builder()
                         .id(customer.getId())
@@ -92,13 +111,20 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public CustomerResponse update(Customer customer) {
-        getCustomerById(customer.getId());
-        customerRepository.saveAndFlush(customer);
+    public CustomerResponse update(UpdateCustomerRequest request) {
+        validationUtil.validate(request);
+        getCustomerById(request.getId());
+        customerRepository.saveAndFlush(
+                Customer.builder()
+                        .id(request.getId())
+                        .name(request.getName())
+                        .phone(request.getPhone())
+                        .build()
+        );
         return CustomerResponse.builder()
-                .id(customer.getId())
-                .name(customer.getName())
-                .phoneNumber(customer.getPhone())
+                .id(request.getId())
+                .name(request.getName())
+                .phoneNumber(request.getPhone())
                 .build();
     }
 

@@ -11,6 +11,7 @@ import com.enigma.wmb_api_next.entity.UserAccount;
 import com.enigma.wmb_api_next.entity.UserRole;
 import com.enigma.wmb_api_next.repository.UserAccountRepository;
 import com.enigma.wmb_api_next.service.*;
+import com.enigma.wmb_api_next.util.ValidationUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final CustomerService customerService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final ValidationUtil validationUtil;
 
     @Value("${wmb_api_next.super-admin.username}")
     private String superAdminUsername;
@@ -54,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
         userAccountRepository.saveAndFlush(UserAccount.builder()
                 .username(superAdminUsername)
                 .password(superAdminPassword)
-                .role(List.of(superAdmin, admin, user))
+                .roles(List.of(superAdmin, admin, user))
                 .isEnable(true)
                 .build());
     }
@@ -62,6 +64,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse registerUser(RegisterRequest request) {
+        validationUtil.validate(request);
         UserRole roleUser = userRoleService.saveOrGet(UserRoleEnum.USER);
         return getRegisterResponse(request, List.of(roleUser));
     }
@@ -69,6 +72,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse registerAdmin(RegisterRequest request) {
+        validationUtil.validate(request);
         UserRole roleUser = userRoleService.saveOrGet(UserRoleEnum.ADMIN);
         UserRole roleAdmin = userRoleService.saveOrGet(UserRoleEnum.USER);
         return getRegisterResponse(request, List.of(roleUser, roleAdmin));
@@ -77,6 +81,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public LoginResponse login(LoginRequest request) {
+        validationUtil.validate(request);
         Authentication authentication = new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
 
         Authentication authenticate = authenticationManager.authenticate(authentication);
@@ -97,17 +102,19 @@ public class AuthServiceImpl implements AuthService {
         UserAccount userAccount = userAccountRepository.saveAndFlush(UserAccount.builder()
                 .username(request.getUsername())
                 .password(hashedPassword)
-                .role(userRoles)
+                .roles(userRoles)
                 .isEnable(true)
                 .build());
 
-        customerService.saveAccount(NewAccountRequest.builder()
+        Customer customer = customerService.saveAccount(NewAccountRequest.builder()
                 .name(request.getName())
                 .phone(request.getPhone())
                 .userAccount(userAccount)
                 .build());
 
-        List<String> roles = userAccount.getRole().stream().map(role -> role.getRole().name()).toList();
+        List<String> roles = customer.getUserAccount().getRoles().stream()
+                .map(role -> role.getRole().name())
+                .toList();
 
         return RegisterResponse.builder()
                 .username(userAccount.getUsername())

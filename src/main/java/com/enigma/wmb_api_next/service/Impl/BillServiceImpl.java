@@ -1,14 +1,21 @@
 package com.enigma.wmb_api_next.service.Impl;
 
+import com.enigma.wmb_api_next.constant.TransTypeEnum;
 import com.enigma.wmb_api_next.dto.request.BillRequest;
 import com.enigma.wmb_api_next.dto.request.CustomerRequest;
-import com.enigma.wmb_api_next.dto.response.BillDetailResponse;
-import com.enigma.wmb_api_next.dto.response.BillResponse;
-import com.enigma.wmb_api_next.dto.response.CustomerResponse;
+import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
+import com.enigma.wmb_api_next.dto.response.*;
 import com.enigma.wmb_api_next.entity.*;
 import com.enigma.wmb_api_next.repository.BillRepository;
 import com.enigma.wmb_api_next.service.*;
+import com.enigma.wmb_api_next.specification.BillSpecification;
+import com.enigma.wmb_api_next.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,31 +34,53 @@ public class BillServiceImpl implements BillService {
     private final TransTypeService transTypeService;
     private final MenuService menuService;
     private final TableMenuService tableMenuService;
+    private final BillSpecification specification;
+    private final ValidationUtil validationUtil;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public BillResponse save(BillRequest request) {
-        CustomerRequest customerRequest = CustomerRequest.builder().name(request.getCustomerName()).phoneNumber(request.getCustomerPhone()).build();
+        CustomerRequest customerRequest = CustomerRequest.builder()
+                .name(request.getCustomerName())
+                .phoneNumber(request.getCustomerPhone())
+                .build();
+
+        validationUtil.validate(customerRequest);
+
         CustomerResponse customerResponse = customerService.saveOrGet(customerRequest);
         Customer customer = Customer.builder()
                 .id(customerResponse.getId())
                 .name(customerResponse.getName())
                 .phone(customerResponse.getPhoneNumber()).build();
 
+        TransTypeResponse transTypeResponse = transTypeService.getById(request.getTransType());
+
+        TableMenuResponse tableMenuResponse = tableMenuService.getByName(request.getTableName());
+        TableMenu tableMenu = TableMenu.builder()
+                .id(tableMenuResponse.getId())
+                .name(tableMenuResponse.getName())
+                .build();
+
         Bill bill = Bill.builder()
                 .customer(customer)
                 .transDate(new Date(Instant.now().toEpochMilli()))
-                .table(tableMenuService.getByName(request.getTableName()))
-                .transType(transTypeService.getById(request.getTransType()))
+                .table(tableMenu)
+                .transType(TransType.builder()
+                        .id(TransTypeEnum.valueOf(transTypeResponse.getId()))
+                        .description(transTypeResponse.getDescription())
+                        .build())
                 .build();
 
         List<BillDetail> billDetails = request.getBillDetails().stream().map(
-                billDetailRequest -> BillDetail.builder()
-                        .bill(bill)
-                        .menu(menuService.getMenuById(billDetailRequest.getMenuId()))
-                        .qty(billDetailRequest.getQty())
-                        .price(billDetailRequest.getPrice())
-                        .build()
+                billDetailRequest -> {
+                    validationUtil.validate(billDetailRequest);
+                    return BillDetail.builder()
+                            .bill(bill)
+                            .menu(menuService.getMenuById(billDetailRequest.getMenuId()))
+                            .qty(billDetailRequest.getQty())
+                            .price(billDetailRequest.getPrice())
+                            .build();
+                }
         ).toList();
 
         bill.setBillDetails(billDetails);
@@ -101,8 +130,14 @@ public class BillServiceImpl implements BillService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<BillResponse> getAll() {
-        List<Bill> bills = billRepository.findAll();
+    public List<BillResponse> getAll(SearchBillRequest request) {
+        Specification<Bill> BillSpecification = specification.specification(request);
+
+        Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
+        if (request.getPage() <= 0) request.setPage(1);
+        Pageable pageable = PageRequest.of((request.getPage() - 1), request.getSize(), sort);
+
+        Page<Bill> bills = billRepository.findAll(BillSpecification, pageable);
         return bills.stream().map(
                 bill -> BillResponse.builder()
                         .id(bill.getId())

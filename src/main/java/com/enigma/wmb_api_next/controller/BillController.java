@@ -3,9 +3,12 @@ package com.enigma.wmb_api_next.controller;
 import com.enigma.wmb_api_next.constant.ApiUrl;
 import com.enigma.wmb_api_next.constant.StatusMessege;
 import com.enigma.wmb_api_next.dto.request.BillRequest;
+import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
 import com.enigma.wmb_api_next.dto.response.BillResponse;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.service.BillService;
+import com.enigma.wmb_api_next.util.DateUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,8 +43,19 @@ public class BillController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponse<List<BillResponse>>> getAll() {
-        List<BillResponse> bills = billService.getAll();
+    public ResponseEntity<CommonResponse<List<BillResponse>>> getAll(
+            @RequestParam(name = "daily", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String daily,
+            @RequestParam(name = "weekly", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String weeklyStart,
+            @RequestParam(name = "weekly", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String weeklyEnd,
+            @RequestParam(name = "monthly", required = false) @JsonFormat(pattern = "yyyy-MM") String monthly
+    ) {
+        SearchBillRequest searchBillRequest = SearchBillRequest.builder()
+                .daily(DateUtil.parseDate(daily))
+                .weeklyStart(DateUtil.parseDate(weeklyStart))
+                .weeklyEnd(DateUtil.parseDate(weeklyEnd))
+                .monthly(DateUtil.parseDate(monthly))
+                .build();
+        List<BillResponse> bills = billService.getAll(searchBillRequest);
         CommonResponse<List<BillResponse>> response = CommonResponse.<List<BillResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message(StatusMessege.SUCCESS_RETRIEVE_LIST)

@@ -1,6 +1,7 @@
 package com.enigma.wmb_api_next.service.Impl;
 
 import com.enigma.wmb_api_next.dto.request.CustomerRequest;
+import com.enigma.wmb_api_next.dto.request.NewAccountRequest;
 import com.enigma.wmb_api_next.dto.response.CustomerResponse;
 import com.enigma.wmb_api_next.entity.Customer;
 import com.enigma.wmb_api_next.repository.CustomerRepository;
@@ -20,21 +21,32 @@ import java.util.List;
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public Customer saveOrGet(String name) {
+    public CustomerResponse saveOrGet(CustomerRequest request) {
         Customer customer = Customer.builder()
-                .name(name)
+                .name(request.getName())
+                .phone(request.getPhoneNumber())
                 .build();
-        return customerRepository.findByNameLikeIgnoreCase("%" + name + "%").orElseGet(() -> customerRepository.saveAndFlush(customer));
+        Customer saved = customerRepository.findByNameLikeIgnoreCaseAndPhoneEquals("%" + request.getName() + "%", request.getPhoneNumber()).orElseGet(() -> customerRepository.saveAndFlush(customer));
+        return CustomerResponse.builder()
+                .name(saved.getName())
+                .phoneNumber(saved.getPhone())
+                .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public CustomerResponse save(CustomerRequest request) {
-        Customer customer = Customer.builder().name(request.getName()).phone(request.getPhoneNumber()).build();
+    public void saveAccount(NewAccountRequest request) {
+        Customer customer = Customer.builder()
+                .name(request.getName())
+                .phone(request.getPhone())
+                .userAccount(request.getUserAccount())
+                .build();
         customerRepository.saveAndFlush(customer);
-        return CustomerResponse.builder().name(customer.getName()).phoneNumber(customer.getPhone()).build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public List<CustomerResponse> saveBulk(List<CustomerRequest> requests) {
         List<CustomerResponse> responses = new ArrayList<>();
@@ -54,36 +66,43 @@ public class CustomerServiceImpl implements CustomerService {
         return responses;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public CustomerResponse getById(String id) {
         Customer customer = getCustomerById(id);
         return CustomerResponse.builder()
+                .id(customer.getId())
                 .name(customer.getName())
                 .phoneNumber(customer.getPhone())
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public List<CustomerResponse> getAll() {
         List<Customer> customers = customerRepository.findAll();
         return customers.stream().map(
                 customer -> CustomerResponse.builder()
+                        .id(customer.getId())
                         .name(customer.getName())
                         .phoneNumber(customer.getPhone())
                         .build()
         ).toList();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public CustomerResponse update(Customer customer) {
         getCustomerById(customer.getId());
         customerRepository.saveAndFlush(customer);
         return CustomerResponse.builder()
+                .id(customer.getId())
                 .name(customer.getName())
                 .phoneNumber(customer.getPhone())
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String id) {
         Customer customer = getCustomerById(id);

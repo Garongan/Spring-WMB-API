@@ -22,4 +22,8 @@ public class Customer {
 
     @Column(name = "phone_number")
     private String phone;
+
+    @OneToOne
+    @JoinColumn(name = "user_account_id", unique = true)
+    private UserAccount userAccount;
 }

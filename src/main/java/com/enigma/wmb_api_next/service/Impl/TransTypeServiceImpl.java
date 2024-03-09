@@ -16,11 +16,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransTypeServiceImpl implements TransTypeService {
     private final TransTypeRepository transTypeRepository;
+
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public TransType getById(String id) {
         return transTypeRepository.findTransTypeEnumById(id.toUpperCase()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Trans Type Not Found"));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public List<TransType> getAll() {
         return transTypeRepository.findAll();

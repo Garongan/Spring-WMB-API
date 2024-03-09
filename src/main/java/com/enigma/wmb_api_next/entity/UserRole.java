@@ -1,25 +1,22 @@
 package com.enigma.wmb_api_next.entity;
 
 import com.enigma.wmb_api_next.constant.TableName;
+import com.enigma.wmb_api_next.constant.UserRoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
-
-@Entity
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = TableName.M_MENU)
-public class Menu {
+@Entity(name = TableName.M_USER_ROLE)
+public class UserRole {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
-
-    @Column(name = "price", nullable = false)
-    private Long price;
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private UserRoleEnum role;
 }

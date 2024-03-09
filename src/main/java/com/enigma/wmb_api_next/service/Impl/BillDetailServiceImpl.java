@@ -14,11 +14,15 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class BillDetailServiceImpl implements BillDetailService {
     private final BillDetailRepository billDetailRepository;
+
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public BillDetail save(BillDetail billDetail) {
         return billDetailRepository.saveAndFlush(billDetail);
     }
 
+
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public BillDetail getById(String id) {
         return billDetailRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BIll Detail Not Found"));

@@ -1,6 +1,5 @@
 package com.enigma.wmb_api_next.dto.response;
 
-
 import lombok.*;
 
 @Setter
@@ -8,8 +7,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CustomerResponse {
+public class MenuResponse {
     private String id;
     private String name;
-    private String phoneNumber;
+    private Long price;
 }

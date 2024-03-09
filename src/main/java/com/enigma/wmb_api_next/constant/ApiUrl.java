@@ -7,4 +7,5 @@ public class ApiUrl {
     public static final String TABLE_URL = "/tables";
     public static final String TRANS_TYPE_URL = "/trans-types";
     public static final String BILL_URL = "/bills";
+    public static final String AUTH_URL = "/auth";
 }

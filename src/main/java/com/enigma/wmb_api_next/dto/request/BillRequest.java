@@ -13,6 +13,7 @@ import java.util.List;
 public class BillRequest {
     private Date transDate;
     private String customerName;
+    private String customerPhone;
     private String tableName;
     private String transType;
     private List<BillDetailRequest> billDetails;

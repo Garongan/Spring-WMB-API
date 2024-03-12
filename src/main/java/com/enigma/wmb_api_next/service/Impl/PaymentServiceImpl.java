@@ -40,7 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Payment createPayment(Bill bill) {
+    public Payment  createPayment(Bill bill) {
         long amount = bill.getBillDetails().stream().mapToLong(
                         value -> (value.getPrice() * value.getQty()))
                 .reduce(0, Long::sum);
@@ -65,7 +65,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         ResponseEntity<Map<String, String>> response = restClient.post()
-                .uri(BASE_URL + "/transactions")
+                .uri(BASE_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Basic " + SECRET_KEY)
                 .body(paymentRequest)
                 .retrieve().toEntity(new ParameterizedTypeReference<>() {

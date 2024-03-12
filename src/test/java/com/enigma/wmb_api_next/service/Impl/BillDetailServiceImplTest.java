@@ -29,14 +29,14 @@ class BillDetailServiceImplTest {
 //        Given
         UserRole superAdminRole = UserRole.builder()
                 .id("super-admin-role-id")
-                .role(UserRoleEnum.SUPER_ADMIN)
+                .role(UserRoleEnum.ROLE_SUPER_ADMIN)
                 .build();
         UserRole adminRole = UserRole.builder()
                 .id("admin-role-id")
-                .role(UserRoleEnum.ADMIN).build();
+                .role(UserRoleEnum.ROLE_ADMIN).build();
         UserRole userRole = UserRole.builder()
                 .id("user-role-id")
-                .role(UserRoleEnum.USER).build();
+                .role(UserRoleEnum.ROLE_USER).build();
 
         UserAccount mockUserAccount = UserAccount.builder()
                 .id("user-id")
@@ -102,14 +102,14 @@ class BillDetailServiceImplTest {
 
         UserRole superAdminRole = UserRole.builder()
                 .id("super-admin-role-id")
-                .role(UserRoleEnum.SUPER_ADMIN)
+                .role(UserRoleEnum.ROLE_SUPER_ADMIN)
                 .build();
         UserRole adminRole = UserRole.builder()
                 .id("admin-role-id")
-                .role(UserRoleEnum.ADMIN).build();
+                .role(UserRoleEnum.ROLE_ADMIN).build();
         UserRole userRole = UserRole.builder()
                 .id("user-role-id")
-                .role(UserRoleEnum.USER).build();
+                .role(UserRoleEnum.ROLE_USER).build();
 
         UserAccount mockUserAccount = UserAccount.builder()
                 .id("user-id")

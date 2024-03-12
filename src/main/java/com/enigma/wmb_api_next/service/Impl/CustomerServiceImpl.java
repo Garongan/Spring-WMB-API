@@ -40,11 +40,30 @@ public class CustomerServiceImpl implements CustomerService {
                 .name(request.getName())
                 .phone(request.getPhoneNumber())
                 .build();
-        Customer saved = customerRepository.findByNameLikeIgnoreCaseAndPhoneEquals("%" + request.getName() + "%", request.getPhoneNumber()).orElseGet(() -> customerRepository.saveAndFlush(customer));
+        Customer saved = customerRepository.findByNameLikeIgnoreCaseAndPhoneEquals(request.getName(), request.getPhoneNumber())
+                .orElseGet(() -> customerRepository.saveAndFlush(customer));
         return CustomerResponse.builder()
                 .name(saved.getName())
                 .phoneNumber(saved.getPhone())
                 .build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Customer save(CustomerRequest request) {
+        return customerRepository.saveAndFlush(
+                Customer.builder()
+                        .name(request.getName())
+                        .phone(request.getPhoneNumber())
+                        .build()
+        );
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Customer getCustomerByNameAndPhone(String name, String phone) {
+        return customerRepository.findByNameLikeIgnoreCaseAndPhoneEquals(name, phone)
+                .orElse(null);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -97,7 +116,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
         if (request.getPage() <= 0) request.setPage(1);
-        Pageable pageable = PageRequest.of(request.getPage() -1, request.getSize(), sort);
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
 
         Page<Customer> customers = customerRepository.findAll(CustomerSpecification, pageable);
         return customers.stream().map(
@@ -135,7 +154,7 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.delete(customer);
     }
 
-    private Customer getCustomerById(String id){
+    private Customer getCustomerById(String id) {
         return customerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer Not Found"));
     }
 }

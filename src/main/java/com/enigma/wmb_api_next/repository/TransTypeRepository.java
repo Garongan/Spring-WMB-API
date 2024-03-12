@@ -13,4 +13,5 @@ public interface TransTypeRepository extends JpaRepository<TransType, String> {
 
     @Query(value = "SELECT * FROM m_trans_type WHERE id = :id", nativeQuery = true)
     Optional<TransType> findTransTypeEnumById(@Param("id") String id);
+
 }

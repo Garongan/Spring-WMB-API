@@ -1,7 +1,7 @@
 package com.enigma.wmb_api_next.constant;
 
 public enum UserRoleEnum {
-    SUPER_ADMIN,
-    ADMIN,
-    USER
+    ROLE_SUPER_ADMIN,
+    ROLE_ADMIN,
+    ROLE_USER
 }

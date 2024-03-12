@@ -11,6 +11,8 @@ import java.util.List;
 
 public interface CustomerService {
     CustomerResponse saveOrGet(CustomerRequest request);
+    Customer save(CustomerRequest request);
+    Customer getCustomerByNameAndPhone(String name, String phone);
     Customer saveAccount(NewAccountRequest request);
     List<CustomerResponse> saveBulk(List<CustomerRequest> requests);
     CustomerResponse getById(String id);

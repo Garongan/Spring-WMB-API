@@ -26,13 +26,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor
 public class BillServiceImpl implements BillService {
     private final BillRepository billRepository;
+    private final BillDetailService billDetailService;
     private final CustomerService customerService;
     private final TransTypeService transTypeService;
     private final MenuService menuService;
@@ -51,11 +50,14 @@ public class BillServiceImpl implements BillService {
 
         validationUtil.validate(customerRequest);
 
-        CustomerResponse customerResponse = customerService.saveOrGet(customerRequest);
-        Customer customer = Customer.builder()
-                .id(customerResponse.getId())
-                .name(customerResponse.getName())
-                .phone(customerResponse.getPhoneNumber()).build();
+        Customer customer;
+        Customer foundedCustomer = customerService.getCustomerByNameAndPhone(request.getCustomerName(), request.getCustomerPhone());
+
+        if (foundedCustomer == null) {
+            customer = customerService.save(customerRequest);
+        } else {
+            customer = foundedCustomer;
+        }
 
         TransTypeResponse transTypeResponse = transTypeService.getById(request.getTransType());
 
@@ -74,6 +76,7 @@ public class BillServiceImpl implements BillService {
                         .description(transTypeResponse.getDescription())
                         .build())
                 .build();
+        billRepository.saveAndFlush(bill);
 
         List<BillDetail> billDetails = request.getBillDetails().stream().map(
                 billDetailRequest -> {
@@ -92,16 +95,14 @@ public class BillServiceImpl implements BillService {
         Payment payment = paymentService.createPayment(bill);
         bill.setPayment(payment);
 
-        Bill saved = billRepository.saveAndFlush(bill);
-
         return BillResponse.builder()
-                .id(saved.getId())
-                .transType(saved.getTransType().getId().name())
-                .customerId(saved.getCustomer().getId())
-                .customerName(saved.getCustomer().getName())
-                .tableName(saved.getTable().getName())
-                .transDate(saved.getTransDate())
-                .billdetails(saved.getBillDetails().stream().map(
+                .id(bill.getId())
+                .transType(bill.getTransType().getId().name())
+                .customerId(bill.getCustomer().getId())
+                .customerName(bill.getCustomer().getName())
+                .tableName(bill.getTable().getName())
+                .transDate(bill.getTransDate())
+                .billdetails(bill.getBillDetails().stream().map(
                         billDetail -> BillDetailResponse.builder()
                                 .id(billDetail.getId())
                                 .menuId(billDetail.getMenu().getId())
@@ -152,35 +153,42 @@ public class BillServiceImpl implements BillService {
 
         Page<Bill> bills = billRepository.findAll(BillSpecification, pageable);
         return bills.stream().map(
-                bill -> BillResponse.builder()
-                        .id(bill.getId())
-                        .customerId(bill.getCustomer().getId())
-                        .customerName(bill.getCustomer().getName())
-                        .transDate(bill.getTransDate())
-                        .tableName(bill.getTable().getName())
-                        .transType(bill.getTransType().getDescription())
-                        .billdetails(bill.getBillDetails().stream().map(
-                                billDetail -> BillDetailResponse.builder()
-                                        .id(billDetail.getId())
-                                        .menuId(billDetail.getMenu().getId())
-                                        .qty(billDetail.getQty())
-                                        .price(billDetail.getPrice())
-                                        .build()
-                        ).toList())
-                        .payment(PaymentResponse.builder()
-                                .id(bill.getPayment().getId())
-                                .token(bill.getPayment().getTokan())
-                                .transactionStatus(bill.getPayment().getTransactionStatus())
-                                .redirectUrl(bill.getPayment().getRedirectUrl())
-                                .build()
-                        )
-                        .build()
+                bill -> {
+                    BillResponse.BillResponseBuilder billResponseBuilder = BillResponse.builder()
+                            .id(bill.getId())
+                            .customerId(bill.getCustomer().getId())
+                            .customerName(bill.getCustomer().getName())
+                            .transDate(bill.getTransDate())
+                            .tableName(bill.getTable().getName())
+                            .transType(bill.getTransType().getDescription())
+                            .billdetails(bill.getBillDetails().stream().map(
+                                    billDetail -> BillDetailResponse.builder()
+                                            .id(billDetail.getId())
+                                            .menuId(billDetail.getMenu().getId())
+                                            .qty(billDetail.getQty())
+                                            .price(billDetail.getPrice())
+                                            .build()
+                            ).toList());
+                    if (bill.getPayment() != null)
+                            billResponseBuilder.payment(PaymentResponse.builder()
+                                    .id(bill.getPayment().getId())
+                                    .token(bill.getPayment().getTokan())
+                                    .transactionStatus(bill.getPayment().getTransactionStatus())
+                                    .redirectUrl(bill.getPayment().getRedirectUrl())
+                                    .build()
+                            )
+                            .build();
+                    else billResponseBuilder.payment(null);
+                    return billResponseBuilder.build();
+                }
         ).toList();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void UpdateStatusPayment(UpdateBillRequest request) {
-        Bill bill = billRepository.findById(request.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, StatusMessage.NOT_FOUND));
+    public void updateStatusPayment(UpdateBillRequest request) {
+        Bill bill = billRepository.findById(request.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, StatusMessage.NOT_FOUND));
         Payment payment = bill.getPayment();
         payment.setTransactionStatus(request.getTransactionStatus());
     }

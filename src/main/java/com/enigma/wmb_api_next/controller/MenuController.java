@@ -11,6 +11,7 @@ import com.enigma.wmb_api_next.service.MenuService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,11 +30,11 @@ public class MenuController {
 
     @PostMapping(
             produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<CommonResponse<?>> save(
             @RequestPart(name = "menu") String menu,
-            @RequestPart(name = "image") MultipartFile image
+            @RequestPart(name = "image") @Nullable MultipartFile image
     ) {
         try {
             MenuRequest menuRequest = objectMapper.readValue(menu, new TypeReference<>() {});
@@ -93,11 +94,11 @@ public class MenuController {
 
     @PutMapping(
             produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<CommonResponse<MenuResponse>> update(
             @RequestPart(name = "menu") String menu,
-            @RequestPart(name = "image") MultipartFile image
+            @RequestPart(name = "image") @Nullable MultipartFile image
     ) {
         try {
             UpdateMenuRequest updateMenuRequest = objectMapper.readValue(menu, new TypeReference<>() {});

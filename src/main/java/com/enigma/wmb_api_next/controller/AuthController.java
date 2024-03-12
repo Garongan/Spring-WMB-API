@@ -28,10 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final AuthService authService;
 
-    @Operation(
-            summary = "Register User",
-            description = "Register User"
-    )
+    @Operation(summary = "Register User")
     @SecurityRequirement(name = "Authorization")
     @PostMapping(
             path = "/register/user",
@@ -48,12 +45,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(
-            summary = "Register Admin",
-            description = "Register Admin"
-    )
+    @Operation(summary = "Register Admin")
     @SecurityRequirement(name = "Authorization")
-    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping(
             path = "/register/admin",
             consumes = MediaType.APPLICATION_JSON_VALUE,

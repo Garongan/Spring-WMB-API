@@ -65,7 +65,20 @@ public class CustomerController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAll(SearchCustomerRequest request) {
+    public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAll(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(name = "page", defaultValue = "1") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
+    ) {
+        SearchCustomerRequest request = SearchCustomerRequest.builder()
+                .name(name)
+                .direction(direction)
+                .sortBy(sortBy)
+                .page(page)
+                .size(size)
+                .build();
         List<CustomerResponse> customerResponses = customerService.getAll(request);
         CommonResponse<List<CustomerResponse>> response = CommonResponse.<List<CustomerResponse>>builder()
                 .statusCode(HttpStatus.OK.value())

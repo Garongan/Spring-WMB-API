@@ -14,5 +14,5 @@ public interface BillService {
 
     List<BillResponse> getAll(SearchBillRequest request);
 
-    void UpdateStatusPayment(UpdateBillRequest request);
+    void updateStatusPayment(UpdateBillRequest request);
 }

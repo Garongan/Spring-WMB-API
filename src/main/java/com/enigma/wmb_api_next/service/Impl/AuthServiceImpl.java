@@ -49,13 +49,13 @@ public class AuthServiceImpl implements AuthService {
         Optional<UserAccount> account = userAccountRepository.findByUsername(superAdminUsername);
 
         if (account.isPresent()) return;
-        UserRole superAdmin = userRoleService.saveOrGet(UserRoleEnum.SUPER_ADMIN);
-        UserRole admin = userRoleService.saveOrGet(UserRoleEnum.ADMIN);
-        UserRole user = userRoleService.saveOrGet(UserRoleEnum.USER);
+        UserRole superAdmin = userRoleService.saveOrGet(UserRoleEnum.ROLE_SUPER_ADMIN);
+        UserRole admin = userRoleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
+        UserRole user = userRoleService.saveOrGet(UserRoleEnum.ROLE_USER);
 
         userAccountRepository.saveAndFlush(UserAccount.builder()
                 .username(superAdminUsername)
-                .password(superAdminPassword)
+                .password(passwordEncoder.encode(superAdminPassword))
                 .roles(List.of(superAdmin, admin, user))
                 .isEnable(true)
                 .build());
@@ -65,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse registerUser(RegisterRequest request) {
         validationUtil.validate(request);
-        UserRole roleUser = userRoleService.saveOrGet(UserRoleEnum.USER);
+        UserRole roleUser = userRoleService.saveOrGet(UserRoleEnum.ROLE_USER);
         return getRegisterResponse(request, List.of(roleUser));
     }
 
@@ -73,8 +73,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse registerAdmin(RegisterRequest request) {
         validationUtil.validate(request);
-        UserRole roleUser = userRoleService.saveOrGet(UserRoleEnum.ADMIN);
-        UserRole roleAdmin = userRoleService.saveOrGet(UserRoleEnum.USER);
+        UserRole roleUser = userRoleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
+        UserRole roleAdmin = userRoleService.saveOrGet(UserRoleEnum.ROLE_USER);
         return getRegisterResponse(request, List.of(roleUser, roleAdmin));
     }
 

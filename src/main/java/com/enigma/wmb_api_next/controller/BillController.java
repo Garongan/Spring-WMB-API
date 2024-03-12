@@ -8,12 +8,15 @@ import com.enigma.wmb_api_next.dto.request.UpdateBillRequest;
 import com.enigma.wmb_api_next.dto.response.BillResponse;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.service.BillService;
+import com.enigma.wmb_api_next.service.PdfService;
 import com.enigma.wmb_api_next.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,17 +27,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BillController {
     private final BillService billService;
+    private final PdfService pdfService;
 
-    @PostMapping(
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER') or authenticated")
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<?>> save(@RequestBody BillRequest request) {
         BillResponse bill = billService.save(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(bill, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -44,18 +46,27 @@ public class BillController {
         return ResponseEntity.ok(getCommonResponse(bill, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
     }
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<BillResponse>>> getAll(
             @RequestParam(name = "daily", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String daily,
             @RequestParam(name = "weekly", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String weeklyStart,
             @RequestParam(name = "weekly", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String weeklyEnd,
-            @RequestParam(name = "monthly", required = false) @JsonFormat(pattern = "yyyy-MM") String monthly
+            @RequestParam(name = "monthly", required = false) @JsonFormat(pattern = "yyyy-MM") String monthly,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "sortBy", defaultValue = "transDate") String sortBy,
+            @RequestParam(name = "page", defaultValue = "1") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
         SearchBillRequest searchBillRequest = SearchBillRequest.builder()
                 .daily(DateUtil.parseDate(daily))
                 .weeklyStart(DateUtil.parseDate(weeklyStart))
                 .weeklyEnd(DateUtil.parseDate(weeklyEnd))
                 .monthly(DateUtil.parseDate(monthly))
+                .direction(direction)
+                .sortBy(sortBy)
+                .page(page)
+                .size(size)
                 .build();
         List<BillResponse> bills = billService.getAll(searchBillRequest);
         CommonResponse<List<BillResponse>> response = CommonResponse.<List<BillResponse>>builder()
@@ -66,7 +77,18 @@ public class BillController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping(
+    @GetMapping(path = "/export/pdf")
+    public ResponseEntity<byte[]> exportBillToPdf() {
+        List<BillResponse> billResponseList = billService.getAll(null);
+        byte[] generatePdf = pdfService.generatePdf(billResponseList);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_PDF);
+        httpHeaders.setContentDispositionFormData("filename", "bills.pdf");
+        httpHeaders.setContentLength(generatePdf.length);
+        return new ResponseEntity<>(generatePdf, httpHeaders, HttpStatus.OK);
+    }
+
+    @PostMapping(
             path = "/status",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
@@ -76,7 +98,7 @@ public class BillController {
                 .id(request.get("order_id").toString())
                 .transactionStatus(request.get("transaction_status").toString())
                 .build();
-        billService.UpdateStatusPayment(updateBillRequest);
+        billService.updateStatusPayment(updateBillRequest);
         return ResponseEntity.ok(getCommonResponse(null, HttpStatus.OK, StatusMessege.SUCCESS_UPDATE));
     }
 

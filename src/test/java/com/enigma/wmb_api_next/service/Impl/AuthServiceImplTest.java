@@ -68,15 +68,15 @@ class AuthServiceImplTest {
 //        Given
         UserRole mockSuperAdmin = UserRole.builder()
                 .id("role-1")
-                .role(UserRoleEnum.SUPER_ADMIN)
+                .role(UserRoleEnum.ROLE_SUPER_ADMIN)
                 .build();
         UserRole mockAdmin = UserRole.builder()
                 .id("role-2")
-                .role(UserRoleEnum.ADMIN)
+                .role(UserRoleEnum.ROLE_ADMIN)
                 .build();
         UserRole mockUser = UserRole.builder()
                 .id("role-3")
-                .role(UserRoleEnum.USER)
+                .role(UserRoleEnum.ROLE_USER)
                 .build();
 
         UserAccount mockSuperAdminAccount = UserAccount.builder()
@@ -109,15 +109,15 @@ class AuthServiceImplTest {
 //        Given
         UserRole mockSuperAdmin = UserRole.builder()
                 .id("role-1")
-                .role(UserRoleEnum.SUPER_ADMIN)
+                .role(UserRoleEnum.ROLE_SUPER_ADMIN)
                 .build();
         UserRole mockAdmin = UserRole.builder()
                 .id("role-2")
-                .role(UserRoleEnum.ADMIN)
+                .role(UserRoleEnum.ROLE_ADMIN)
                 .build();
         UserRole mockUser = UserRole.builder()
                 .id("role-3")
-                .role(UserRoleEnum.USER)
+                .role(UserRoleEnum.ROLE_USER)
                 .build();
 
         UserAccount mockSuperAdminAccount = UserAccount.builder()
@@ -130,15 +130,15 @@ class AuthServiceImplTest {
 
 //        Stubbing config
         Mockito.when(userAccountRepository.saveAndFlush(mockSuperAdminAccount)).thenReturn(mockSuperAdminAccount);
-        Mockito.when(userRoleService.saveOrGet(UserRoleEnum.SUPER_ADMIN)).thenReturn(mockSuperAdmin);
-        Mockito.when(userRoleService.saveOrGet(UserRoleEnum.ADMIN)).thenReturn(mockAdmin);
-        Mockito.when(userRoleService.saveOrGet(UserRoleEnum.USER)).thenReturn(mockUser);
+        Mockito.when(userRoleService.saveOrGet(UserRoleEnum.ROLE_SUPER_ADMIN)).thenReturn(mockSuperAdmin);
+        Mockito.when(userRoleService.saveOrGet(UserRoleEnum.ROLE_ADMIN)).thenReturn(mockAdmin);
+        Mockito.when(userRoleService.saveOrGet(UserRoleEnum.ROLE_USER)).thenReturn(mockUser);
 
 //        When
         UserAccount actualSuperAdminAccount = userAccountRepository.saveAndFlush(mockSuperAdminAccount);
-        UserRole actualSuperAdmin = userRoleService.saveOrGet(UserRoleEnum.SUPER_ADMIN);
-        UserRole actualAdmin = userRoleService.saveOrGet(UserRoleEnum.ADMIN);
-        UserRole actualUser = userRoleService.saveOrGet(UserRoleEnum.USER);
+        UserRole actualSuperAdmin = userRoleService.saveOrGet(UserRoleEnum.ROLE_SUPER_ADMIN);
+        UserRole actualAdmin = userRoleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
+        UserRole actualUser = userRoleService.saveOrGet(UserRoleEnum.ROLE_USER);
         actualSuperAdminAccount.setRoles(List.of(actualSuperAdmin, actualAdmin, actualUser));
 
 //        Then
@@ -162,7 +162,7 @@ class AuthServiceImplTest {
 
         UserRole mockRoleUser = UserRole.builder()
                 .id("role-user-id")
-                .role(UserRoleEnum.USER)
+                .role(UserRoleEnum.ROLE_USER)
                 .build();
 
         String mockHashedPassword = "hashedPassword";
@@ -230,11 +230,11 @@ class AuthServiceImplTest {
 
         UserRole mockRoleAdmin = UserRole.builder()
                 .id("role-admin-id")
-                .role(UserRoleEnum.ADMIN)
+                .role(UserRoleEnum.ROLE_ADMIN)
                 .build();
         UserRole mockRoleUser = UserRole.builder()
                 .id("role-user-id")
-                .role(UserRoleEnum.USER)
+                .role(UserRoleEnum.ROLE_USER)
                 .build();
 
         String mockHashedPassword = "hashedPassword";
@@ -299,7 +299,7 @@ class AuthServiceImplTest {
                 .password("password")
                 .build();
 
-        List<String> mockUserRoles = List.of(UserRoleEnum.SUPER_ADMIN.name(), UserRoleEnum.ADMIN.name(), UserRoleEnum.USER.name());
+        List<String> mockUserRoles = List.of(UserRoleEnum.ROLE_SUPER_ADMIN.name(), UserRoleEnum.ROLE_ADMIN.name(), UserRoleEnum.ROLE_USER.name());
 
         List<UserRole> mockUserRoleList = new ArrayList<>();
         for (String role : mockUserRoles) {

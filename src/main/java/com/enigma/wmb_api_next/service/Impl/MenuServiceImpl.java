@@ -102,7 +102,7 @@ public class MenuServiceImpl implements MenuService {
         if (requestImage != null) {
             Image image = imageService.saveImage(requestImage);
             newMenu.setImage(image);
-            imageService.deleteById(oldImage.getId());
+            if (oldImage != null) imageService.deleteById(oldImage.getId());
         }
 
         newMenu.setName(request.getName());
@@ -127,16 +127,17 @@ public class MenuServiceImpl implements MenuService {
     }
 
     private MenuResponse convertToResponse(Menu menu) {
-        return MenuResponse.builder()
-                .id(menu.getId())
-                .name(menu.getName())
-                .price(menu.getPrice())
-                .imageResponse(
-                        ImageResponse.builder()
-                                .name(menu.getImage().getName())
-                                .url(ApiUrl.API_URL + ApiUrl.MENU_URL + "/" + menu.getImage().getId() + "/images")
-                                .build()
-                )
-                .build();
+        MenuResponse.MenuResponseBuilder builder = MenuResponse.builder();
+        builder.id(menu.getId());
+        builder.name(menu.getName());
+        builder.price(menu.getPrice());
+        if (menu.getImage() != null) builder.imageResponse(
+                ImageResponse.builder()
+                        .name(menu.getImage().getName())
+                        .url(ApiUrl.API_URL + ApiUrl.MENU_URL + "/" + menu.getImage().getId() + "/images")
+                        .build()
+        );
+        else builder.imageResponse(null);
+        return builder.build();
     }
 }

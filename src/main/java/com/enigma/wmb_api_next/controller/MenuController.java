@@ -7,12 +7,14 @@ import com.enigma.wmb_api_next.dto.request.SearchMenuRequest;
 import com.enigma.wmb_api_next.dto.request.UpdateMenuRequest;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.MenuResponse;
+import com.enigma.wmb_api_next.dto.response.PaginationResponse;
 import com.enigma.wmb_api_next.service.MenuService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +39,8 @@ public class MenuController {
             @RequestPart(name = "image") @Nullable MultipartFile image
     ) {
         try {
-            MenuRequest menuRequest = objectMapper.readValue(menu, new TypeReference<>() {});
+            MenuRequest menuRequest = objectMapper.readValue(menu, new TypeReference<>() {
+            });
             menuRequest.setImage(image);
 
             MenuResponse saved = menuService.save(menuRequest);
@@ -57,7 +60,7 @@ public class MenuController {
     )
     public ResponseEntity<CommonResponse<List<MenuResponse>>> saveBulk(@RequestBody List<MenuRequest> menu) {
         List<MenuResponse> menuResponses = menuService.saveBulk(menu);
-        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponseList(menuResponses, HttpStatus.CREATED, StatusMessage.SUCCESS_CREATE_LIST));
+        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponseList(menuResponses));
     }
 
     @GetMapping(
@@ -88,8 +91,24 @@ public class MenuController {
                 .page(page)
                 .size(size)
                 .build();
-        List<MenuResponse> menuResponses = menuService.getAll(searchMenuRequest);
-        return ResponseEntity.ok(getCommonResponseList(menuResponses, HttpStatus.OK, StatusMessage.SUCCESS_RETRIEVE_LIST));
+        Page<MenuResponse> menuResponses = menuService.getAll(searchMenuRequest);
+
+        PaginationResponse paginationResponse = PaginationResponse.builder()
+                .totalPages(menuResponses.getTotalPages())
+                .totalElement(menuResponses.getTotalElements())
+                .page(menuResponses.getNumber() + 1)
+                .size(menuResponses.getSize())
+                .hasPrevious(menuResponses.hasPrevious())
+                .hasNext(menuResponses.hasNext())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(CommonResponse.<List<MenuResponse>>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .message(StatusMessage.SUCCESS_RETRIEVE_LIST)
+                        .data(menuResponses.getContent())
+                        .paginationResponse(paginationResponse)
+                        .build());
     }
 
     @PutMapping(
@@ -101,7 +120,8 @@ public class MenuController {
             @RequestPart(name = "image") @Nullable MultipartFile image
     ) {
         try {
-            UpdateMenuRequest updateMenuRequest = objectMapper.readValue(menu, new TypeReference<>() {});
+            UpdateMenuRequest updateMenuRequest = objectMapper.readValue(menu, new TypeReference<>() {
+            });
             updateMenuRequest.setImage(image);
             MenuResponse updated = menuService.update(updateMenuRequest);
             return ResponseEntity.ok(getCommonResponse(updated, HttpStatus.OK, StatusMessage.SUCCESS_UPDATE));
@@ -132,10 +152,10 @@ public class MenuController {
                 .build();
     }
 
-    private CommonResponse<List<MenuResponse>> getCommonResponseList(List<MenuResponse> menuResponses, HttpStatus status, String message) {
+    private CommonResponse<List<MenuResponse>> getCommonResponseList(List<MenuResponse> menuResponses) {
         return CommonResponse.<List<MenuResponse>>builder()
-                .statusCode(status.value())
-                .message(message)
+                .statusCode(HttpStatus.CREATED.value())
+                .message(StatusMessage.SUCCESS_CREATE_LIST)
                 .data(menuResponses)
                 .build();
     }

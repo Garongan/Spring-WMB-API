@@ -6,6 +6,7 @@ import com.enigma.wmb_api_next.dto.request.SearchCustomerRequest;
 import com.enigma.wmb_api_next.dto.request.UpdateCustomerRequest;
 import com.enigma.wmb_api_next.dto.response.CustomerResponse;
 import com.enigma.wmb_api_next.entity.Customer;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface CustomerService {
     Customer saveAccount(NewAccountRequest request);
     List<CustomerResponse> saveBulk(List<CustomerRequest> requests);
     CustomerResponse getById(String id);
-    List<CustomerResponse> getAll(SearchCustomerRequest request);
+    Page<CustomerResponse> getAll(SearchCustomerRequest request);
     CustomerResponse update(UpdateCustomerRequest request);
     void delete(String id);
 }

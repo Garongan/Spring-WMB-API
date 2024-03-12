@@ -111,7 +111,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<CustomerResponse> getAll(SearchCustomerRequest request) {
+    public Page<CustomerResponse> getAll(SearchCustomerRequest request) {
         Specification<Customer> CustomerSpecification = specification.specification(request.getName());
 
         Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
@@ -119,13 +119,13 @@ public class CustomerServiceImpl implements CustomerService {
         Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
 
         Page<Customer> customers = customerRepository.findAll(CustomerSpecification, pageable);
-        return customers.stream().map(
+        return customers.map(
                 customer -> CustomerResponse.builder()
                         .id(customer.getId())
                         .name(customer.getName())
                         .phoneNumber(customer.getPhone())
                         .build()
-        ).toList();
+        );
     }
 
     @Transactional(rollbackFor = Exception.class)

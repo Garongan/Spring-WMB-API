@@ -81,7 +81,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<MenuResponse> getAll(SearchMenuRequest request) {
+    public Page<MenuResponse> getAll(SearchMenuRequest request) {
         Specification<Menu> menuSpecification = specification.specification(request);
 
         Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
@@ -89,7 +89,7 @@ public class MenuServiceImpl implements MenuService {
         Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize());
 
         Page<Menu> menus = menuRepository.findAll(menuSpecification, pageable);
-        return menus.stream().map(this::convertToResponse).toList();
+        return menus.map(this::convertToResponse);
     }
 
     @Transactional(rollbackFor = Exception.class)

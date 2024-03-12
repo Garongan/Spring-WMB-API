@@ -6,8 +6,10 @@ import com.enigma.wmb_api_next.dto.request.SearchCustomerRequest;
 import com.enigma.wmb_api_next.dto.request.UpdateCustomerRequest;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.CustomerResponse;
+import com.enigma.wmb_api_next.dto.response.PaginationResponse;
 import com.enigma.wmb_api_next.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -79,11 +81,22 @@ public class CustomerController {
                 .page(page)
                 .size(size)
                 .build();
-        List<CustomerResponse> customerResponses = customerService.getAll(request);
+        Page<CustomerResponse> customerResponses = customerService.getAll(request);
+
+        PaginationResponse paginationResponse = PaginationResponse.builder()
+                .totalPages(customerResponses.getTotalPages())
+                .totalElement(customerResponses.getTotalElements())
+                .page(customerResponses.getNumber() + 1)
+                .size(customerResponses.getSize())
+                .hasNext(customerResponses.hasNext())
+                .hasPrevious(customerResponses.hasPrevious())
+                .build();
+
         CommonResponse<List<CustomerResponse>> response = CommonResponse.<List<CustomerResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("List of Customer successfully retrieved")
-                .data(customerResponses)
+                .data(customerResponses.getContent())
+                .paginationResponse(paginationResponse)
                 .build();
         return ResponseEntity.ok(response);
     }

@@ -144,7 +144,7 @@ public class BillServiceImpl implements BillService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<BillResponse> getAll(SearchBillRequest request) {
+    public Page<BillResponse> getAll(SearchBillRequest request) {
         Specification<Bill> BillSpecification = specification.specification(request);
 
         Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
@@ -152,7 +152,7 @@ public class BillServiceImpl implements BillService {
         Pageable pageable = PageRequest.of((request.getPage() - 1), request.getSize(), sort);
 
         Page<Bill> bills = billRepository.findAll(BillSpecification, pageable);
-        return bills.stream().map(
+        return bills.map(
                 bill -> {
                     BillResponse.BillResponseBuilder billResponseBuilder = BillResponse.builder()
                             .id(bill.getId())
@@ -170,18 +170,22 @@ public class BillServiceImpl implements BillService {
                                             .build()
                             ).toList());
                     if (bill.getPayment() != null)
-                            billResponseBuilder.payment(PaymentResponse.builder()
-                                    .id(bill.getPayment().getId())
-                                    .token(bill.getPayment().getTokan())
-                                    .transactionStatus(bill.getPayment().getTransactionStatus())
-                                    .redirectUrl(bill.getPayment().getRedirectUrl())
-                                    .build()
-                            )
-                            .build();
-                    else billResponseBuilder.payment(null);
+                        billResponseBuilder.payment(PaymentResponse.builder()
+                                .id(bill.getPayment().getId())
+                                .token(bill.getPayment().getTokan())
+                                .transactionStatus(bill.getPayment().getTransactionStatus())
+                                .redirectUrl(bill.getPayment().getRedirectUrl())
+                                .build()
+                        );
                     return billResponseBuilder.build();
                 }
-        ).toList();
+        );
+    }
+
+    @Override
+    public List<BillResponse> exportAll() {
+        List<Bill> bills = billRepository.findAll();
+        return null;
     }
 
     @Transactional(rollbackFor = Exception.class)

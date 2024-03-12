@@ -7,11 +7,12 @@ import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
 import com.enigma.wmb_api_next.dto.request.UpdateBillRequest;
 import com.enigma.wmb_api_next.dto.response.BillResponse;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
+import com.enigma.wmb_api_next.dto.response.PaginationResponse;
 import com.enigma.wmb_api_next.service.BillService;
 import com.enigma.wmb_api_next.service.PdfService;
-import com.enigma.wmb_api_next.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -59,27 +60,38 @@ public class BillController {
             @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
         SearchBillRequest searchBillRequest = SearchBillRequest.builder()
-                .daily(DateUtil.parseDate(daily))
-                .weeklyStart(DateUtil.parseDate(weeklyStart))
-                .weeklyEnd(DateUtil.parseDate(weeklyEnd))
-                .monthly(DateUtil.parseDate(monthly))
+                .daily(daily)
+                .weeklyStart(weeklyStart)
+                .weeklyEnd(weeklyEnd)
+                .monthly(monthly)
                 .direction(direction)
                 .sortBy(sortBy)
                 .page(page)
                 .size(size)
                 .build();
-        List<BillResponse> bills = billService.getAll(searchBillRequest);
+        Page<BillResponse> bills = billService.getAll(searchBillRequest);
+
+        PaginationResponse paginationResponse = PaginationResponse.builder()
+                .totalPages(bills.getTotalPages())
+                .totalElement(bills.getTotalElements())
+                .page(bills.getNumber() + 1)
+                .size(bills.getSize())
+                .hasNext(bills.hasNext())
+                .hasPrevious(bills.hasPrevious())
+                .build();
+
         CommonResponse<List<BillResponse>> response = CommonResponse.<List<BillResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message(StatusMessege.SUCCESS_RETRIEVE_LIST)
-                .data(bills)
+                .data(bills.getContent())
+                .paginationResponse(paginationResponse)
                 .build();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(path = "/export/pdf")
     public ResponseEntity<byte[]> exportBillToPdf() {
-        List<BillResponse> billResponseList = billService.getAll(null);
+        List<BillResponse> billResponseList = billService.exportAll();
         byte[] generatePdf = pdfService.generatePdf(billResponseList);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_PDF);

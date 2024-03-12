@@ -2,12 +2,14 @@ package com.enigma.wmb_api_next.specification;
 
 import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
 import com.enigma.wmb_api_next.entity.Bill;
+import com.enigma.wmb_api_next.util.DateUtil;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Configuration
@@ -17,16 +19,20 @@ public class BillSpecification {
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getDaily() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("transDate"), request.getDaily()));
+                Date date = DateUtil.parseDate(request.getDaily());
+                predicates.add(criteriaBuilder.equal(root.get("transDate"), date));
             }
 
             if (request.getWeeklyStart() != null && request.getWeeklyEnd() != null) {
-                predicates.add(criteriaBuilder.between(root.get("transDate"), request.getWeeklyStart(), request.getWeeklyEnd()));
+                Date startDate = DateUtil.parseDate(request.getWeeklyStart());
+                Date endDate = DateUtil.parseDate(request.getWeeklyEnd());
+                predicates.add(criteriaBuilder.between(root.get("transDate"), startDate, endDate));
             }
 
             if (request.getMonthly() != null) {
+                Date date = DateUtil.parseDate(request.getMonthly());
                 Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(request.getMonthly().getTime());
+                calendar.setTimeInMillis(date.getTime());
                 int month = calendar.get(Calendar.MONTH);
                 int year = calendar.get(Calendar.YEAR);
                 Predicate monthFilter = criteriaBuilder.equal(root.get("transDate").get("month"), month);

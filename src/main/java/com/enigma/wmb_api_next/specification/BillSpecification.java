@@ -3,10 +3,12 @@ package com.enigma.wmb_api_next.specification;
 import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
 import com.enigma.wmb_api_next.entity.Bill;
 import com.enigma.wmb_api_next.util.DateUtil;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,7 +22,9 @@ public class BillSpecification {
 
             if (request.getDaily() != null) {
                 Date date = DateUtil.parseDate(request.getDaily());
-                predicates.add(criteriaBuilder.equal(root.get("transDate"), date));
+                Timestamp start = new Timestamp(date.getTime());
+                Timestamp end = new Timestamp(start.toInstant().plusSeconds(24 * 60 - 1).toEpochMilli());
+                predicates.add(criteriaBuilder.between(root.get("transDate"), start, end));
             }
 
             if (request.getWeeklyStart() != null && request.getWeeklyEnd() != null) {
@@ -35,8 +39,10 @@ public class BillSpecification {
                 calendar.setTimeInMillis(date.getTime());
                 int month = calendar.get(Calendar.MONTH);
                 int year = calendar.get(Calendar.YEAR);
-                Predicate monthFilter = criteriaBuilder.equal(root.get("transDate").get("month"), month);
-                Predicate yearFilter = criteriaBuilder.equal(root.get("transDate").get("year"), year);
+                Expression<Integer> monthExpression = criteriaBuilder.function("EXTRACT", Integer.class, criteriaBuilder.literal("MONTH"), root.get("transDate"));
+                Expression<Integer> yearExpression = criteriaBuilder.function("EXTRACT", Integer.class, criteriaBuilder.literal("YEAR"), root.get("transDate"));
+                Predicate monthFilter = criteriaBuilder.equal(monthExpression, month);
+                Predicate yearFilter = criteriaBuilder.equal(yearExpression, year);
                 predicates.add(criteriaBuilder.and(monthFilter, yearFilter));
             }
 

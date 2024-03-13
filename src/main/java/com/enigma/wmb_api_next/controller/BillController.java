@@ -13,6 +13,8 @@ import com.enigma.wmb_api_next.service.Impl.PdfServiceImpl;
 import com.enigma.wmb_api_next.service.PdfService;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lowagie.text.DocumentException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,6 +36,8 @@ public class BillController {
     private final BillService billService;
     private List<BillResponse> billResponseList;
 
+    @Operation(summary = "Save new bill")
+    @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER') or authenticated")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<?>> save(@RequestBody BillRequest request) {
@@ -41,6 +45,8 @@ public class BillController {
         return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(bill, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
 
+    @Operation(summary = "Get bill by id")
+    @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(
             path = "/{id}",
@@ -51,6 +57,8 @@ public class BillController {
         return ResponseEntity.ok(getCommonResponse(bill, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
     }
 
+    @Operation(summary = "Get all bill")
+    @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<BillResponse>>> getAll(
@@ -95,6 +103,9 @@ public class BillController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Export bill to pdf")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(path = "/export/pdf")
     public void exportBillPdf(HttpServletResponse response) throws DocumentException, IOException {
         response.setContentType("application/pdf");
@@ -105,6 +116,7 @@ public class BillController {
 
     }
 
+    @Operation(summary = "Update status payment")
     @PostMapping(
             path = "/status",
             produces = MediaType.APPLICATION_JSON_VALUE,

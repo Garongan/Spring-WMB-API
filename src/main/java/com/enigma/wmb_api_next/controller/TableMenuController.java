@@ -8,10 +8,13 @@ import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.TableMenuResponse;
 import com.enigma.wmb_api_next.entity.TableMenu;
 import com.enigma.wmb_api_next.service.TableMenuService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +25,9 @@ import java.util.List;
 public class TableMenuController {
     private final TableMenuService tableMenuService;
 
+    @Operation(summary = "Create new table menu")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PostMapping(
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
@@ -37,6 +43,9 @@ public class TableMenuController {
                 .body(getCommonResponse(tableMenu, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
     }
 
+    @Operation(summary = "Get all table menu")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<TableMenu>>> getALL() {
         List<TableMenuResponse> tableMenuResponses = tableMenuService.getAll();
@@ -49,6 +58,9 @@ public class TableMenuController {
         return ResponseEntity.ok(getCommonResponse(tableMenus));
     }
 
+    @Operation(summary = "Get table menu by id")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER')")
     @GetMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -62,6 +74,9 @@ public class TableMenuController {
         return ResponseEntity.ok(getCommonResponse(tableMenu, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
     }
 
+    @Operation(summary = "Update table menu")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PutMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
@@ -76,6 +91,9 @@ public class TableMenuController {
         return ResponseEntity.ok(getCommonResponse(tableMenu, HttpStatus.OK, StatusMessege.SUCCESS_UPDATE));
     }
 
+    @Operation(summary = "Delete table menu")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @DeleteMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE

@@ -2,6 +2,7 @@ package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
 import com.enigma.wmb_api_next.service.ImageService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImageController {
     private final ImageService imageService;
 
+    @Operation(summary = "Download Image")
     @GetMapping(path = "/api/menus/{id}/images")
     public ResponseEntity<?> downloadImageTest(@PathVariable(name = "id") String id){
         Resource resource = imageService.getById(id);

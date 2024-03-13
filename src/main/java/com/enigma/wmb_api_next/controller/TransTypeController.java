@@ -5,9 +5,12 @@ import com.enigma.wmb_api_next.constant.StatusMessage;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.TransTypeResponse;
 import com.enigma.wmb_api_next.service.TransTypeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +24,9 @@ import java.util.List;
 public class TransTypeController {
     private final TransTypeService transTypeService;
 
+    @Operation(summary = "Get TransType by Id")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -33,6 +39,9 @@ public class TransTypeController {
                 .build());
     }
 
+    @Operation(summary = "Get All TransType")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<TransTypeResponse> >> getAll() {
         List<TransTypeResponse> responses = transTypeService.getAll();

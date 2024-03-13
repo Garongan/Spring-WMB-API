@@ -12,12 +12,15 @@ import com.enigma.wmb_api_next.service.MenuService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +33,9 @@ public class MenuController {
     private final MenuService menuService;
     private final ObjectMapper objectMapper;
 
+    @Operation(summary = "Save new menu")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PostMapping(
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -53,6 +59,9 @@ public class MenuController {
         }
     }
 
+    @Operation(summary = "Save new menu in bulk")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PostMapping(
             path = "/bulk",
             produces = MediaType.APPLICATION_JSON_VALUE,
@@ -63,6 +72,9 @@ public class MenuController {
         return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponseList(menuResponses));
     }
 
+    @Operation(summary = "Get menu by id")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER')")
     @GetMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -72,6 +84,9 @@ public class MenuController {
         return ResponseEntity.ok(getCommonResponse(response, HttpStatus.OK, StatusMessage.SUCCESS_RETRIEVE));
     }
 
+    @Operation(summary = "Get all menu")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<MenuResponse>>> getAll(
             @RequestParam(name = "name", required = false) String name,
@@ -111,6 +126,9 @@ public class MenuController {
                         .build());
     }
 
+    @Operation(summary = "Update menu")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PutMapping(
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -131,6 +149,9 @@ public class MenuController {
         }
     }
 
+    @Operation(summary = "Delete menu")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @DeleteMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE

@@ -178,41 +178,8 @@ public class BillServiceImpl implements BillService {
                         );
                     return billResponseBuilder.build();
                 }
-        );
-    }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public List<BillResponse> exportAll() {
-        List<Bill> bills = billRepository.findAll();
-        return bills.stream().map(
-                bill -> {
-                    BillResponse.BillResponseBuilder billResponseBuilder = BillResponse.builder()
-                            .id(bill.getId())
-                            .customerId(bill.getCustomer().getId())
-                            .customerName(bill.getCustomer().getName())
-                            .transDate(bill.getTransDate().toString())
-                            .tableName(bill.getTable().getName())
-                            .transType(bill.getTransType().getDescription())
-                            .billdetails(bill.getBillDetails().stream().map(
-                                    billDetail -> BillDetailResponse.builder()
-                                            .id(billDetail.getId())
-                                            .menuId(billDetail.getMenu().getId())
-                                            .qty(billDetail.getQty())
-                                            .price(billDetail.getPrice())
-                                            .build()
-                            ).toList());
-                    if (bill.getPayment() != null)
-                        billResponseBuilder.payment(PaymentResponse.builder()
-                                .id(bill.getPayment().getId())
-                                .token(bill.getPayment().getTokan())
-                                .transactionStatus(bill.getPayment().getTransactionStatus())
-                                .redirectUrl(bill.getPayment().getRedirectUrl())
-                                .build()
-                        );
-                    return billResponseBuilder.build();
-                }
-        ).toList();
+        );
     }
 
     @Transactional(rollbackFor = Exception.class)

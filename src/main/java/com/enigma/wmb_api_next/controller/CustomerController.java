@@ -8,11 +8,14 @@ import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.CustomerResponse;
 import com.enigma.wmb_api_next.dto.response.PaginationResponse;
 import com.enigma.wmb_api_next.service.CustomerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +26,9 @@ import java.util.List;
 public class CustomerController {
     private final CustomerService customerService;
 
+    @Operation(summary = "Create new customer")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -37,6 +43,9 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Create new list of customer")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PostMapping(
             path = "/bulk",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -52,6 +61,9 @@ public class CustomerController {
         return ResponseEntity.ok(responses);
     }
 
+    @Operation(summary = "Get customer by id")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -66,6 +78,9 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get all customer")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAll(
             @RequestParam(name = "name", required = false) String name,
@@ -101,6 +116,9 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Update customer")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @PutMapping(
             path = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE,
@@ -116,6 +134,9 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Delete customer")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<CommonResponse<String>> delete(@PathVariable String id) {
         customerService.delete(id);

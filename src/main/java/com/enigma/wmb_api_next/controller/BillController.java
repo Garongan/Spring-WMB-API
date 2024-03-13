@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +91,7 @@ public class BillController {
     }
 
     @GetMapping(path = "/export/pdf")
-    public ResponseEntity<byte[]> exportBillToPdf() {
+    public ResponseEntity<byte[]> exportBillToPdf() throws IOException {
         List<BillResponse> billResponseList = billService.exportAll();
         byte[] generatePdf = pdfService.generatePdf(billResponseList);
         HttpHeaders httpHeaders = new HttpHeaders();

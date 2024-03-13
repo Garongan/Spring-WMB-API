@@ -1,87 +1,94 @@
 package com.enigma.wmb_api_next.service.Impl;
 
-import com.enigma.wmb_api_next.dto.response.BillDetailResponse;
 import com.enigma.wmb_api_next.dto.response.BillResponse;
 import com.enigma.wmb_api_next.service.PdfService;
+import com.lowagie.text.*;
+import com.lowagie.text.Font;
+import com.lowagie.text.pdf.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.awt.*;
 import java.util.List;
 
 @Service
 @Slf4j
 public class PdfServiceImpl implements PdfService {
-    private static final int PAGE_HEIGHT = 792;
-    private static final int MARGIN = 50;
+    private final List<BillResponse> billResponseList;
+
+    public PdfServiceImpl(List<BillResponse> billResponseList) {
+        this.billResponseList = billResponseList;
+    }
+
+    private void writeTabHeader(PdfPTable table) {
+        PdfPCell cell = new PdfPCell();
+        cell.setBackgroundColor(Color.BLUE);
+        cell.setPadding(5);
+
+        Font font = FontFactory.getFont(FontFactory.HELVETICA);
+        font.setSize(12);
+        font.setColor(Color.WHITE);
+
+        cell.setPhrase(new Phrase("Bill ID", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Transaction Date", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Transaction Type", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Customer Name", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Table", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Payment ID", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Status", font));
+        table.addCell(cell);
+    }
+
+    private void writeTableData(PdfPTable table) {
+        for (BillResponse bill : billResponseList) {
+            table.addCell(bill.getId());
+            table.addCell(bill.getTransDate().toString());
+            table.addCell(bill.getTransType());
+            table.addCell(bill.getCustomerName());
+            table.addCell(bill.getTableName());
+            table.addCell(bill.getPayment().getId());
+            table.addCell(bill.getPayment().getTransactionStatus());
+        }
+    }
 
     @Override
-    public byte[] generatePdf(List<BillResponse> bills) {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
-             PDDocument document = new PDDocument()) {
-            PDPage page = new PDPage();
-            document.addPage(page);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page);
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+    public void export(HttpServletResponse response) throws DocumentException {
+        try (Document document = new Document(PageSize.A4.rotate())) {
+            PdfWriter.getInstance(document, response.getOutputStream());
 
-            int yPos = PAGE_HEIGHT - MARGIN;
+            document.open();
+            Font font = FontFactory.getFont(FontFactory.HELVETICA, 14, Font.HELVETICA);
+            font.setColor(Color.BLUE);
 
-            for (BillResponse bill : bills) {
-                if (yPos <= MARGIN + 200) {
-                    contentStream.close();
-                    page = new PDPage();
-                    document.addPage(page);
-                    contentStream = new PDPageContentStream(document, page);
-                    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-                    yPos = PAGE_HEIGHT - MARGIN;
-                }
+            Paragraph billReports = new Paragraph("Bill Reports", font);
+            billReports.setAlignment(Paragraph.ALIGN_CENTER);
 
-                contentStream.beginText();
-                contentStream.newLineAtOffset(MARGIN, yPos);
-                contentStream.showText("Bill ID: " + bill.getId());
-                contentStream.newLineAtOffset(0, -20);
-                contentStream.showText("Transaction Date: " + bill.getTransDate());
-                contentStream.newLineAtOffset(0, -20);
-                contentStream.showText("Transaction Type: " + bill.getTransType());
-                contentStream.newLineAtOffset(0, -20);
-                contentStream.showText("Customer Name: " + bill.getCustomerName());
-                contentStream.newLineAtOffset(0, -20);
-                contentStream.showText("Table: " + bill.getTableName());
-                contentStream.newLineAtOffset(0, -20);
-                contentStream.showText("Payment ID: " + bill.getPayment().getId());
-                contentStream.newLineAtOffset(0, -20);
-                contentStream.showText("Status: " + bill.getPayment().getTransactionStatus());
-                contentStream.endText();
+            document.add(billReports);
 
-                yPos -= 150;
+            PdfPTable table = new PdfPTable(7);
+            table.setWidthPercentage(100f);
+            table.setWidths(new float[]{2.0f, 3.5f, 3.5f, 3.0f, 2.0f, 2.0f, 1.5f});
+            table.setSpacingBefore(10);
 
-                for (BillDetailResponse detail : bill.getBilldetails()) {
-                    contentStream.beginText();
-                    contentStream.newLineAtOffset(100, yPos);
-                    contentStream.showText("Menu ID: " + detail.getMenuId());
-                    contentStream.newLineAtOffset(0, -20);
-                    contentStream.showText("Quantity: " + detail.getQty());
-                    contentStream.newLineAtOffset(0, -20);
-                    contentStream.showText("Price: " + detail.getPrice());
-                    contentStream.endText();
-                    yPos -= 60;
-                }
+            writeTabHeader(table);
+            writeTableData(table);
 
-                yPos -= 20;
-            }
-
-            contentStream.close();
-            document.save(out);
-
-            return out.toByteArray();
-        } catch (IOException e) {
-            log.error("Error generating PDF", e);
-            return new byte[0];
+            document.add(table);
+        } catch (Exception e){
+            log.error("Error exporting PDF", e);
         }
     }
 }

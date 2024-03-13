@@ -9,8 +9,11 @@ import com.enigma.wmb_api_next.dto.response.BillResponse;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.PaginationResponse;
 import com.enigma.wmb_api_next.service.BillService;
+import com.enigma.wmb_api_next.service.Impl.PdfServiceImpl;
 import com.enigma.wmb_api_next.service.PdfService;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lowagie.text.DocumentException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -29,7 +32,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BillController {
     private final BillService billService;
-    private final PdfService pdfService;
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER') or authenticated")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -91,14 +93,14 @@ public class BillController {
     }
 
     @GetMapping(path = "/export/pdf")
-    public ResponseEntity<byte[]> exportBillToPdf() throws IOException {
+    public void exportBillPdf(HttpServletResponse response) throws DocumentException, IOException {
         List<BillResponse> billResponseList = billService.exportAll();
-        byte[] generatePdf = pdfService.generatePdf(billResponseList);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_PDF);
-        httpHeaders.setContentDispositionFormData("filename", "bills.pdf");
-        httpHeaders.setContentLength(generatePdf.length);
-        return new ResponseEntity<>(generatePdf, httpHeaders, HttpStatus.OK);
+        response.setContentType("application/pdf");
+        String headerValue = "attachment; filename=bills.pdf";
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, headerValue);
+        PdfService pdfService = new PdfServiceImpl(billResponseList);
+        pdfService.export(response);
+
     }
 
     @PostMapping(

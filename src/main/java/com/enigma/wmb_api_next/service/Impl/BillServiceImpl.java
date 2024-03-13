@@ -100,7 +100,7 @@ public class BillServiceImpl implements BillService {
                 .customerId(bill.getCustomer().getId())
                 .customerName(bill.getCustomer().getName())
                 .tableName(bill.getTable().getName())
-                .transDate(bill.getTransDate())
+                .transDate(bill.getTransDate().toString())
                 .billdetails(bill.getBillDetails().stream().map(
                         billDetail -> BillDetailResponse.builder()
                                 .id(billDetail.getId())
@@ -134,7 +134,7 @@ public class BillServiceImpl implements BillService {
                 .id(bill.getId())
                 .customerId(bill.getCustomer().getId())
                 .customerName(bill.getCustomer().getName())
-                .transDate(Date.from(Instant.now()))
+                .transDate(Date.from(Instant.now()).toString())
                 .tableName(bill.getTable().getName())
                 .transType(bill.getTransType().getDescription())
                 .billdetails(billDetailResponses)
@@ -157,7 +157,7 @@ public class BillServiceImpl implements BillService {
                             .id(bill.getId())
                             .customerId(bill.getCustomer().getId())
                             .customerName(bill.getCustomer().getName())
-                            .transDate(bill.getTransDate())
+                            .transDate(bill.getTransDate().toString())
                             .tableName(bill.getTable().getName())
                             .transType(bill.getTransType().getDescription())
                             .billdetails(bill.getBillDetails().stream().map(
@@ -191,7 +191,7 @@ public class BillServiceImpl implements BillService {
                             .id(bill.getId())
                             .customerId(bill.getCustomer().getId())
                             .customerName(bill.getCustomer().getName())
-                            .transDate(bill.getTransDate())
+                            .transDate(bill.getTransDate().toString())
                             .tableName(bill.getTable().getName())
                             .transType(bill.getTransType().getDescription())
                             .billdetails(bill.getBillDetails().stream().map(

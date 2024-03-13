@@ -32,6 +32,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BillController {
     private final BillService billService;
+    private List<BillResponse> billResponseList;
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'USER') or authenticated")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -74,6 +75,8 @@ public class BillController {
                 .build();
         Page<BillResponse> bills = billService.getAll(searchBillRequest);
 
+        this.billResponseList = bills.getContent();
+
         PaginationResponse paginationResponse = PaginationResponse.builder()
                 .totalPages(bills.getTotalPages())
                 .totalElement(bills.getTotalElements())
@@ -94,7 +97,6 @@ public class BillController {
 
     @GetMapping(path = "/export/pdf")
     public void exportBillPdf(HttpServletResponse response) throws DocumentException, IOException {
-        List<BillResponse> billResponseList = billService.exportAll();
         response.setContentType("application/pdf");
         String headerValue = "attachment; filename=bills.pdf";
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, headerValue);

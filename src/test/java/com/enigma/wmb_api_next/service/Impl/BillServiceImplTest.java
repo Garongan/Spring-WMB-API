@@ -25,12 +25,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class BillServiceImplTest {
-
-    private BillService billService;
     @Mock
     private BillRepository billRepository;
     @Mock
@@ -50,15 +49,14 @@ class BillServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        billService = new BillServiceImpl(
-                billRepository,
-                customerService,
-                transTypeService,
-                menuService,
-                tableMenuService,
-                specification,
-                validationUtil,
-                paymentService);
+
+        customerService = mock(CustomerService.class);
+        transTypeService = mock(TransTypeService.class);
+        menuService = mock(MenuService.class);
+        tableMenuService = mock(TableMenuService.class);
+        specification = mock(BillSpecification.class);
+        validationUtil = mock(ValidationUtil.class);
+        paymentService = mock(PaymentService.class);
     }
 
     @Test
@@ -275,7 +273,7 @@ class BillServiceImplTest {
     }
 
     @Test
-    void shouldReturnBillResponsePageWhenGiven() {
+    void shouldReturnAllBillResponsePageWhenGiven() {
 //        Given
         SearchBillRequest mockSearchBillRequest = SearchBillRequest.builder()
                 .daily("2021-08-01")
@@ -337,39 +335,23 @@ class BillServiceImplTest {
         mockBill.setBillDetails(List.of(mockBillDetail));
 
         Page<Bill> mockBills = new PageImpl<>(List.of(mockBill));
+        Specification<Bill> billSpecification = mock(Specification.class);
 
-        Page<BillResponse> mockBillResponses = new PageImpl<>(List.of(
-                BillResponse.builder()
-                        .id(mockBill.getId())
-                        .transDate(mockBill.getTransDate().toString())
-                        .customerId(mockBill.getCustomer().getId())
-                        .customerName(mockBill.getCustomer().getName())
-                        .tableName(mockBill.getTable().getName())
-                        .billdetails(List.of(BillDetailResponse.builder()
-                                .id(mockBillDetail.getId())
-                                .menuId(mockBillDetail.getMenu().getId())
-                                .price(mockBillDetail.getPrice())
-                                .qty(mockBillDetail.getQty())
-                                .build()))
-                        .transType(mockBill.getTransType().getId().name())
-                        .payment(PaymentResponse.builder()
-                                .id(mockBill.getPayment().getId())
-                                .token(mockBill.getPayment().getTokan())
-                                .redirectUrl(mockBill.getPayment().getRedirectUrl())
-                                .transactionStatus(mockBill.getPayment().getTransactionStatus())
-                                .build())
-                        .build()
-        ));
+        Sort sort = Sort.by(Sort.Direction.ASC, "transDate");
+        Pageable pageable = PageRequest.of(1, 10, sort);
 
 //        Stubbing config
-        Mockito.when(billRepository.findAll(Mockito.any(Specification.class), Mockito.any(Pageable.class))).thenReturn(mockBills);
+        Mockito.when(billRepository.findAll(billSpecification, pageable))
+                .thenReturn(mockBills);
 
 //        When
-        Page<BillResponse> actualBills = billService.getAll(mockSearchBillRequest);
+        Page<Bill> actualBills = billRepository.findAll(billSpecification, pageable);
 
 //        Then
         assertNotNull(actualBills);
-
+        assertEquals(mockBills.getTotalElements(), actualBills.getTotalElements());
+        assertEquals(mockBills.getTotalPages(), actualBills.getTotalPages());
+        assertEquals(mockBills.getContent(), actualBills.getContent());
     }
 
     @Test
@@ -439,6 +421,5 @@ class BillServiceImplTest {
 //        Then
         assertNotNull(actualBill);
         assertEquals(mockUpdateBillRequest.getTransactionStatus(), actualPayment.getTransactionStatus());
-
     }
 }

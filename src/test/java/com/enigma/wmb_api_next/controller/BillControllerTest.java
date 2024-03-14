@@ -11,8 +11,12 @@ import com.enigma.wmb_api_next.dto.response.BillResponse;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
 import com.enigma.wmb_api_next.dto.response.PaymentResponse;
 import com.enigma.wmb_api_next.service.BillService;
+import com.enigma.wmb_api_next.service.Impl.PdfServiceImpl;
+import com.enigma.wmb_api_next.service.PdfService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lowagie.text.DocumentException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -30,6 +34,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -48,7 +53,7 @@ class BillControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @WithMockUser(username = "username", roles = {"USER"})
+    @WithMockUser(username = "username")
     @Test
     void shouldHave201StatusAndReturnCommonResponseWhenCreateNewBill() throws Exception {
 //        Given
@@ -92,7 +97,7 @@ class BillControllerTest {
                 .build();
 
 //        Stubbing
-        Mockito.when(billService.save(billRequest)).thenReturn(billResponse);
+        Mockito.when(billService.save(Mockito.any())).thenReturn(billResponse);
 
 //        When
         String stringJson = objectMapper.writeValueAsString(billRequest);
@@ -101,7 +106,6 @@ class BillControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                                 .content(stringJson)
                 ).andExpect(MockMvcResultMatchers.status().isCreated())
-                .andDo(MockMvcResultHandlers.print())
                 .andDo(result -> {
                     CommonResponse<BillResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
                     });
@@ -158,18 +162,6 @@ class BillControllerTest {
     @Test
     void shouldReturn200StatusAndCommonResponseWhenGetAll() throws Exception {
 //        Given
-        SearchBillRequest searchBillRequest = SearchBillRequest.builder()
-                .daily("2021-08-01")
-                .weeklyStart("2021-08-01")
-                .weeklyEnd("2021-08-07")
-                .monthly("2021-08")
-                .direction("asc")
-                .sortBy("transDate")
-                .page(1)
-                .size(10)
-                .build();
-
-//        Stubbing
         Page<BillResponse> billResponsePage = new PageImpl<>(List.of(
                 BillResponse.builder()
                         .id("bill-1")
@@ -191,7 +183,9 @@ class BillControllerTest {
                                 .build())
                         .build()
         ));
-        Mockito.when(billService.getAll(searchBillRequest)).thenReturn(billResponsePage);
+
+//        Stubbing
+        Mockito.when(billService.getAll(Mockito.any(SearchBillRequest.class))).thenReturn(billResponsePage);
 
 //        When
         mockMvc.perform(
@@ -206,20 +200,22 @@ class BillControllerTest {
                                 .param("page", "1")
                                 .param("size", "10")
                 ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(MockMvcResultHandlers.print())
                 .andDo(result -> {
                     CommonResponse<List<BillResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
                     });
                     assertEquals(200, response.getStatusCode());
-                    assertEquals(StatusMessege.SUCCESS_RETRIEVE, response.getMessage());
+                    assertEquals(StatusMessege.SUCCESS_RETRIEVE_LIST, response.getMessage());
                     assertNotNull(response.getData());
                 });
     }
 
-
     @WithMockUser(username = "username", roles = {"ADMIN"})
     @Test
-    void exportBillPdf() {
+    void exportBillPdf() throws DocumentException, IOException {
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        PdfService pdfService = Mockito.mock(PdfServiceImpl.class);
+        pdfService.export(response);
+        Mockito.verify(pdfService, Mockito.times(1)).export(response);
 
     }
 

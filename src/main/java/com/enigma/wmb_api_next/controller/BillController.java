@@ -116,7 +116,6 @@ public class BillController {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, headerValue);
         PdfService pdfService = new PdfServiceImpl(billResponseList);
         pdfService.export(response);
-
     }
 
     @Operation(summary = "Update status payment")

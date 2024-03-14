@@ -57,14 +57,17 @@ public class BillController {
         return ResponseEntity.ok(getCommonResponse(bill, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
     }
 
-    @Operation(summary = "Get all bill")
+    @Operation(
+            summary = "Get all bill",
+            description = "Get all bill with pagination, sort, and search by date, and filter by daily, weekly, and monthly."
+    )
     @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<List<BillResponse>>> getAll(
             @RequestParam(name = "daily", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String daily,
-            @RequestParam(name = "weekly", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String weeklyStart,
-            @RequestParam(name = "weekly", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String weeklyEnd,
+            @RequestParam(name = "weekStart", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String weeklyStart,
+            @RequestParam(name = "weekEnd", required = false) @JsonFormat(pattern = "yyyy-MM-dd") String weeklyEnd,
             @RequestParam(name = "monthly", required = false) @JsonFormat(pattern = "yyyy-MM") String monthly,
             @RequestParam(name = "direction", defaultValue = "asc") String direction,
             @RequestParam(name = "sortBy", defaultValue = "transDate") String sortBy,

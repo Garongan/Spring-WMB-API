@@ -23,24 +23,28 @@ public class BillSpecification {
             if (request.getDaily() != null) {
                 Date date = DateUtil.parseDate(request.getDaily());
                 Timestamp start = new Timestamp(date.getTime());
-                Timestamp end = new Timestamp(start.toInstant().plusSeconds(24 * 60 - 1).toEpochMilli());
+                Timestamp end = new Timestamp(start.toInstant().plusSeconds(24 * 60 * 60 - 1).toEpochMilli());
+                end.setNanos(999999999);
                 predicates.add(criteriaBuilder.between(root.get("transDate"), start, end));
             }
 
             if (request.getWeeklyStart() != null && request.getWeeklyEnd() != null) {
                 Date startDate = DateUtil.parseDate(request.getWeeklyStart());
                 Date endDate = DateUtil.parseDate(request.getWeeklyEnd());
-                predicates.add(criteriaBuilder.between(root.get("transDate"), startDate, endDate));
+                Timestamp start = new Timestamp(startDate.getTime());
+                Timestamp end = new Timestamp(endDate.getTime());
+                end.setNanos(999999999);
+                predicates.add(criteriaBuilder.between(root.get("transDate"), start, end));
             }
 
             if (request.getMonthly() != null) {
                 Date date = DateUtil.parseDate(request.getMonthly());
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(date.getTime());
-                int month = calendar.get(Calendar.MONTH);
+                int month = calendar.get(Calendar.MONTH) + 1;
                 int year = calendar.get(Calendar.YEAR);
-                Expression<Integer> monthExpression = criteriaBuilder.function("EXTRACT", Integer.class, criteriaBuilder.literal("MONTH"), root.get("transDate"));
-                Expression<Integer> yearExpression = criteriaBuilder.function("EXTRACT", Integer.class, criteriaBuilder.literal("YEAR"), root.get("transDate"));
+                Expression<Integer> monthExpression = criteriaBuilder.function("date_part", Integer.class, criteriaBuilder.literal("month"), root.get("transDate"));
+                Expression<Integer> yearExpression = criteriaBuilder.function("date_part", Integer.class, criteriaBuilder.literal("year"), root.get("transDate"));
                 Predicate monthFilter = criteriaBuilder.equal(monthExpression, month);
                 Predicate yearFilter = criteriaBuilder.equal(yearExpression, year);
                 predicates.add(criteriaBuilder.and(monthFilter, yearFilter));

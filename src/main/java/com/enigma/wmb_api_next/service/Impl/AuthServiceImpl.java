@@ -48,7 +48,8 @@ public class AuthServiceImpl implements AuthService {
     public void initSuperAdmin() {
         Optional<UserAccount> account = userAccountRepository.findByUsername(superAdminUsername);
 
-        if (account.isPresent()) return;
+        if (account.isPresent())
+            return;
         UserRole superAdmin = userRoleService.saveOrGet(UserRoleEnum.ROLE_SUPER_ADMIN);
         UserRole admin = userRoleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
         UserRole user = userRoleService.saveOrGet(UserRoleEnum.ROLE_USER);
@@ -82,7 +83,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
         validationUtil.validate(request);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(request.getUsername(),
+                request.getPassword());
 
         Authentication authenticate = authenticationManager.authenticate(authentication);
         SecurityContextHolder.getContext().setAuthentication(authenticate);
@@ -120,5 +122,12 @@ public class AuthServiceImpl implements AuthService {
                 .username(userAccount.getUsername())
                 .roles(roles)
                 .build();
+    }
+
+    public boolean validateToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserAccount userAccount = userAccountRepository.findByUsername(authentication.getPrincipal().toString())
+                .orElse(null);
+        return userAccount != null;
     }
 }

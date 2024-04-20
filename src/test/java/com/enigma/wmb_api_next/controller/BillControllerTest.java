@@ -1,7 +1,7 @@
 package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
-import com.enigma.wmb_api_next.constant.StatusMessege;
+import com.enigma.wmb_api_next.constant.StatusMessage;
 import com.enigma.wmb_api_next.dto.request.BillDetailRequest;
 import com.enigma.wmb_api_next.dto.request.BillRequest;
 import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
@@ -110,7 +110,7 @@ class BillControllerTest {
                     CommonResponse<BillResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
                     });
                     assertEquals(201, response.getStatusCode());
-                    assertEquals(StatusMessege.SUCCESS_CREATE, response.getMessage());
+                    assertEquals(StatusMessage.SUCCESS_CREATE, response.getMessage());
                     assertNotNull(response.getData());
                 });
     }
@@ -153,7 +153,7 @@ class BillControllerTest {
                     CommonResponse<BillResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
                     });
                     assertEquals(200, response.getStatusCode());
-                    assertEquals(StatusMessege.SUCCESS_RETRIEVE, response.getMessage());
+                    assertEquals(StatusMessage.SUCCESS_RETRIEVE, response.getMessage());
                     assertNotNull(response.getData());
                 });
     }
@@ -204,7 +204,7 @@ class BillControllerTest {
                     CommonResponse<List<BillResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
                     });
                     assertEquals(200, response.getStatusCode());
-                    assertEquals(StatusMessege.SUCCESS_RETRIEVE_LIST, response.getMessage());
+                    assertEquals(StatusMessage.SUCCESS_RETRIEVE_LIST, response.getMessage());
                     assertNotNull(response.getData());
                 });
     }
@@ -248,7 +248,7 @@ class BillControllerTest {
                     CommonResponse<?> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
                     });
                     assertEquals(200, response.getStatusCode());
-                    assertEquals(StatusMessege.SUCCESS_UPDATE, response.getMessage());
+                    assertEquals(StatusMessage.SUCCESS_UPDATE, response.getMessage());
                 });
     }
 }

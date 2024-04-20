@@ -1,7 +1,7 @@
 package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
-import com.enigma.wmb_api_next.constant.StatusMessege;
+import com.enigma.wmb_api_next.constant.StatusMessage;
 import com.enigma.wmb_api_next.dto.request.TableMenuRequest;
 import com.enigma.wmb_api_next.dto.request.UpdateTableMenuRequest;
 import com.enigma.wmb_api_next.dto.response.CommonResponse;
@@ -40,7 +40,7 @@ public class TableMenuController {
                 .build();
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(getCommonResponse(tableMenu, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
+                .body(getCommonResponse(tableMenu, HttpStatus.CREATED, StatusMessage.SUCCESS_CREATE));
     }
 
     @Operation(summary = "Get all table menu")
@@ -71,7 +71,7 @@ public class TableMenuController {
                 .id(tableMenuResponse.getId())
                 .name(tableMenuResponse.getName())
                 .build();
-        return ResponseEntity.ok(getCommonResponse(tableMenu, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
+        return ResponseEntity.ok(getCommonResponse(tableMenu, HttpStatus.OK, StatusMessage.SUCCESS_RETRIEVE));
     }
 
     @Operation(summary = "Update table menu")
@@ -88,7 +88,7 @@ public class TableMenuController {
                 .id(updated.getId())
                 .name(updated.getName())
                 .build();
-        return ResponseEntity.ok(getCommonResponse(tableMenu, HttpStatus.OK, StatusMessege.SUCCESS_UPDATE));
+        return ResponseEntity.ok(getCommonResponse(tableMenu, HttpStatus.OK, StatusMessage.SUCCESS_UPDATE));
     }
 
     @Operation(summary = "Delete table menu")
@@ -102,7 +102,7 @@ public class TableMenuController {
         tableMenuService.delete(id);
         CommonResponse<String> response = CommonResponse.<String>builder()
                 .statusCode(HttpStatus.OK.value())
-                .message(StatusMessege.SUCCESS_DELETE)
+                .message(StatusMessage.SUCCESS_DELETE)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -118,7 +118,7 @@ public class TableMenuController {
     private CommonResponse<List<TableMenu>> getCommonResponse(List<TableMenu> tableMenus) {
         return CommonResponse.<List<TableMenu>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .message(StatusMessege.SUCCESS_RETRIEVE_LIST)
+                .message(StatusMessage.SUCCESS_RETRIEVE_LIST)
                 .data(tableMenus)
                 .build();
     }

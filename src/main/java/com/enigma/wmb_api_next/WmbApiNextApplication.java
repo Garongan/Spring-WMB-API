@@ -6,13 +6,13 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(
-		title = "Warung Makan Bahari Next API",
-		version = "1.0.0",
-		description = "WMB API"
-))
+@EnableScheduling
+@EnableCaching
+@OpenAPIDefinition(info = @Info(title = "Warung Makan Bahari Next API", version = "1.0.0", description = "WMB API"))
 @SecurityScheme(name = "Authorization", scheme = "bearer", type = SecuritySchemeType.HTTP, bearerFormat = "JWT")
 public class WmbApiNextApplication {
 

@@ -7,6 +7,10 @@ import com.enigma.wmb_api_next.dto.response.RegisterResponse;
 
 public interface AuthService {
     RegisterResponse registerUser(RegisterRequest request);
+
     RegisterResponse registerAdmin(RegisterRequest request);
+
     LoginResponse login(LoginRequest request);
+
+    boolean validateToken();
 }

@@ -1,7 +1,7 @@
 package com.enigma.wmb_api_next.controller;
 
 import com.enigma.wmb_api_next.constant.ApiUrl;
-import com.enigma.wmb_api_next.constant.StatusMessege;
+import com.enigma.wmb_api_next.constant.StatusMessage;
 import com.enigma.wmb_api_next.dto.request.BillRequest;
 import com.enigma.wmb_api_next.dto.request.SearchBillRequest;
 import com.enigma.wmb_api_next.dto.request.UpdateBillRequest;
@@ -42,7 +42,7 @@ public class BillController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<?>> save(@RequestBody BillRequest request) {
         BillResponse bill = billService.save(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(bill, HttpStatus.CREATED, StatusMessege.SUCCESS_CREATE));
+        return ResponseEntity.status(HttpStatus.CREATED).body(getCommonResponse(bill, HttpStatus.CREATED, StatusMessage.SUCCESS_CREATE));
     }
 
     @Operation(summary = "Get bill by id")
@@ -54,7 +54,7 @@ public class BillController {
     )
     public ResponseEntity<CommonResponse<BillResponse>> getById(@PathVariable String id) {
         BillResponse bill = billService.getById(id);
-        return ResponseEntity.ok(getCommonResponse(bill, HttpStatus.OK, StatusMessege.SUCCESS_RETRIEVE));
+        return ResponseEntity.ok(getCommonResponse(bill, HttpStatus.OK, StatusMessage.SUCCESS_RETRIEVE));
     }
 
     @Operation(
@@ -99,7 +99,7 @@ public class BillController {
 
         CommonResponse<List<BillResponse>> response = CommonResponse.<List<BillResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .message(StatusMessege.SUCCESS_RETRIEVE_LIST)
+                .message(StatusMessage.SUCCESS_RETRIEVE_LIST)
                 .data(bills.getContent())
                 .paginationResponse(paginationResponse)
                 .build();
@@ -130,7 +130,7 @@ public class BillController {
                 .transactionStatus(request.get("transaction_status").toString())
                 .build();
         billService.updateStatusPayment(updateBillRequest);
-        return ResponseEntity.ok(getCommonResponse(null, HttpStatus.OK, StatusMessege.SUCCESS_UPDATE));
+        return ResponseEntity.ok(getCommonResponse(null, HttpStatus.OK, StatusMessage.SUCCESS_UPDATE));
     }
 
     private static CommonResponse<BillResponse> getCommonResponse(BillResponse bill, HttpStatus status, String message) {
